@@ -10,7 +10,7 @@ with open('test1.txt') as f:
 
 # ACTUAL CODE STARTS FORM HERE  
 
-
+# Store here the binary values of each register
 RegAddress = {
   "R0":"000",
   "R1":"001",
@@ -113,11 +113,49 @@ operations_symbol = ["add","sub","xor","slt","sltu","sll","srl","or",
 
 
 
-registers = [ "R0", "R1" , "R2" , "R3" , "R4" , "R5" , "R6"]
-registers_flag= [ "R0", "R1" , "R2" , "R3" , "R4" , "R5" , "R6" , "FLAGS"]
-labels=["hlt"]
-variables=[]
+registers = []
+
+for i in range(32):
+    registers.append("x"+str(i))
+    
 error=False
+
+#**************************** THIS FUNCTION HANDLES ALL ERROR CASES OF TYPE R *******************************************#
+def type_R(value):
+    global error
+    if(len(value)!=4):
+        print("line no" , line_no , " wrong syntax used for", value[0],"instruction",sep=' ' )
+        error=True
+        return
+
+    for i in range(1,len(value)):
+
+        if(value[i] not in registers):
+            print("line no" , line_no ,'(',value[i],')', "is invalid register name ",sep=' ')
+            error=True
+            
+#****************************************************************************
+def decimal_to_binary(decimal_num):
+    # Convert decimal to binary using the built-in bin() function
+    binary_str = bin(decimal_num)[2:]  # Remove the '0b' prefix
+
+    # Pad with leading zeros to ensure a 12-bit representation
+    padded_binary_str = binary_str.zfill(12)
+
+    return padded_binary_str
+
+#************************************************************************
+def write_binary_to_file(binary_value, filename):
+    # Convert the binary string to bytes
+    binary_bytes = int(binary_value, 2)
+
+    # Open the file in binary write mode
+    with open(filename, 'wb') as file:
+        # Write the binary data to the file
+        file.write(binary_bytes)
+        
+
+#****************************************************************************
 
 # HANDLING ALL CASES OF NORMAL INSTRUCTIONS
 line_no=0                                                      
@@ -126,16 +164,12 @@ for line in code:
     if(len(line)==0):
         continue
 
-    value = list(line.split())
 
-    if line_no==len(code):
-        handle_hlt(value)
+    result = line.split()
+    value=[word.rstrip(',') for word in result]
+    # value contains the list for all the elements of an instruction
 
-    if(value[0]=="var"):
-        continue
 
-    if(value[0][0:-1] in labels):
-        value.pop(0)
 
     if(len(value)==0):
         print("line no", line_no , "invalid defnation of labels",sep=' ')
@@ -154,8 +188,8 @@ for line in code:
         else:
             value[0]="mov1"
     
-    if (operations[value[0]][1] == "A"):
-        type_A(value)
+    if (operations[value[0]][1] == "R"):
+        type_R(value)
             
     elif (operations[value[0]][1] == "C"):
         type_C(value)
@@ -225,48 +259,27 @@ for line in code:
         continue
 
     value = list(line.split())
-    if( len(value)>1 and value[0] in labels and value[1] in operations_symbol):
-        value.pop(0)
 
     if (value[0] in operations_symbol):
 
-        if(value[0]=="mov" ):
-            if(value[2][0]=="$"):
-                value[0]="mov1"
-            else:
-                value[0]="mov2"
+        if (operations[value[0]][1] == "R"):
+            r1 = value[1]
+            r2 = value[2]
+            r3 = value[3]
+            s = operations[value[0]][0] + RegAddress[r1] + RegAddress[r2] + RegAddress[r3]
 
-        if (operations[value[0]][1] == "B"):
-            a = value[1]
-            b = value[2][1:]
-            b1 = bin(int(b))[2:]
-            s = operations[value[0]][0] + RegAddress[a] + (8-len(b1))*"0" + b1
-
-        elif (operations[value[0]][1] == "A"):
-            a = value[1]
-            b = value[2]
-            c = value[3]
-            s = operations[value[0]][0] + "00" + RegAddress[a] + RegAddress[b] + RegAddress[c]
-    
-        elif (operations[value[0]][1] == "C"):
-            a = value[1]
-            b = value[2]
-            s = operations[value[0]][0] + "00000" + RegAddress[a] + RegAddress[b]
-
-        elif (operations[value[0]][1] == "D"):
-            a = value[1]
-            b = bin(variables[value[2]])[2:]
-            s = operations[value[0]][0] + RegAddress[a] + (8 - len(b)) * "0" + b
-
-        elif (operations[value[0]][1] == "E"):
-            a=value[1]
-            b=bin(labels[a+":"])[2:]
-            s=operations[value[0]][0] + "000" + (8 - len(b)) * "0" + b
-
-        elif (operations[value[0]][1] == "F"):
-            s = operations[value[0]][0] + "00000000000"
+        elif (operations[value[0]][1] == "I"):
+            r1 = value[1]
+            r2 = value[2]
+            imm = value[3]
+            s = operations[value[0]][0] + RegAddress[r1] + RegAddress[r2] + decimal_to_binary(imm)
 
         print(s)
+        # Open a file in binary write mode
+        write_binary_to_file(s,"stdout.bin")
+
+# The file is automatically closed after the 'with' block
+
 
 
 # ********************************THE END*********************************************************************
