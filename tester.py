@@ -1,3 +1,4 @@
+import re
 RegAddress = {
   "x0":"00000",
   "x1":"00001",
@@ -150,14 +151,14 @@ def write_binary_to_file(text, filename):
     
     file.close
 
-code=["add x0, x1, x2","sub x0, x1, x2","addi x0, x1, 12"]
+code=["add x0,x1,x2","sub x0,x1,x2","addi x0,x1,12"]
 for line in code:
 
-    if(len(line)==0):
-        continue
-
-    result = line.split()
-    value=[word.rstrip(',') for word in result]
+    value = []
+    split_list = re.split(r"\s+|,", line)
+    for word in split_list:
+        if(word!=""):
+            value.append(word)
 
     if (value[0] in operations_symbol):
 
