@@ -1,7 +1,36 @@
 RegAddress = {
   "x0":"00000",
-  "x1":"00100",
-  "x2":"01000"
+  "x1":"00001",
+  "x2":"00010",
+  "x3":"00011",
+  "x4":"00100",
+  "x5":"00101",
+  "x6":"00110",
+  "x7":"00111",
+  "x8":"01000",
+  "x9":"01001",
+  "x10":"01010",
+  "x11":"01011",
+  "x12":"01100",
+  "x13":"01101",
+  "x14":"01110",
+  "x15":"01111",
+  "x16":"10000",
+  "x17":"10001",
+  "x18":"10010",
+  "x19":"10011",
+  "x20":"10100",
+  "x21":"10101",
+  "x22":"10110",
+  "x23":"10111",
+  "x24":"11000",
+  "x25":"11001",
+  "x26":"11010",
+  "x27":"11011",
+  "x28":"11100",
+  "x29":"11101",
+  "x30":"11110",
+  "x31":"11111"
 }
 
 
@@ -133,16 +162,26 @@ for line in code:
     if (value[0] in operations_symbol):
 
         if (operations[value[0]][1] == "R"):
-            r1 = value[1]
-            r2 = value[2]
-            r3 = value[3]
-            s = funct7[value[0]][0] + RegAddress[r3] + RegAddress[r2] + funct3[value[0]][0] + RegAddress[r1] + operations[value[0]][0]
+            rd = value[1]
+            rs1 = value[2]
+            rs2 = value[3]
+            s = funct7[value[0]][0] + RegAddress[rs2] + RegAddress[rs1] + funct3[value[0]][0] + RegAddress[rd] + operations[value[0]][0]
 
         elif (operations[value[0]][1] == "I"):
-            r1 = value[1]
-            r2 = value[2]
+            rd = value[1]
+            rs1 = value[2]
             imm = value[3]
-            s = decimal_to_binary(imm) + RegAddress[r2] + funct3[value[0]][0] + RegAddress[r1] + operations[value[0]][0]
+            s = decimal_to_binary(imm) + RegAddress[rs1] + funct3[value[0]][0] + RegAddress[rd] + operations[value[0]][0]
+
+        elif(operations[value[0]][1] == "U"):
+            rd = value[1]
+            imm = value[2]
+            s = decimal_to_binary(imm) + RegAddress[rd] + operations[value[0]][0]
+        
+        elif(operations[value[0]][1] == "J"):
+            rd = value[1]
+            imm = value[2]
+            s = decimal_to_binary(imm) + RegAddress[rd] + "0010111"
     
         
 
