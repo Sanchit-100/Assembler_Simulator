@@ -115,7 +115,7 @@ funct3={
    "bgeu":["111","B"],
 }
 
-operations_symbol = ["add","sub","xor","slt","sltu","sll","srl","or",
+operations_symbol = ["add","sub","xor","slt","sltu","sll","srl","or","sw",
                     "and","addi","sltiu","jalr","beq","bne","bge",
                     "bgeu","blt","bltu","auipc","lui","jal","mul","rst",
                     "halt","rvrs"]
