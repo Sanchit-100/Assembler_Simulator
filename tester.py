@@ -144,9 +144,10 @@ def decimal_to_binary(decimal_num):
 
 #************************************************************************
 def write_binary_to_file(text, filename):
-    
+
+    #open file in binary write mode
     with open(filename, 'a') as file:
-        # Write the binary data to the file
+        # Write the binary data in the 
         file.write(text)
     
     file.close
@@ -173,6 +174,22 @@ for line in code:
             rs1 = value[2]
             imm = value[3]
             s = decimal_to_binary(imm) + RegAddress[rs1] + funct3[value[0]][0] + RegAddress[rd] + operations[value[0]][0]
+
+        elif (operations[value[0]][1] == "S"):
+            rs1 = value[1]
+            imm = value[2]
+            rs2 = value[3]
+            imm1 = decimal_to_binary(imm)[:7]
+            imm2 = decimal_to_binary(imm)[7:]
+            s = imm1 + RegAddress[rs2] + RegAddress[rs1] + "010" + imm2 + "0100011"
+
+        elif (operations[value[0]][1] == "B"):
+            rs1 = value[2]
+            rs2 = value[3]
+            imm = value[1]
+            imm1 = decimal_to_binary(imm)[0] + decimal_to_binary(imm)[2:8]
+            imm2 = decimal_to_binary(imm)[8:12] + decimal_to_binary(imm)[1]
+            s = imm1 + RegAddress[rs2] + RegAddress[rs1] + funct3[value[0]][0] + imm2 + "1100011"
 
         elif(operations[value[0]][1] == "U"):
             rd = value[1]
