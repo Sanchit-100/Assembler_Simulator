@@ -117,7 +117,7 @@ funct3={
 }
 
 operations_symbol = ["add","sub","xor","slt","sltu","sll","srl","or","sw",
-                    "and","addi","sltiu","jalr","beq","bne","bge",
+                    "and","addi","lw","sltiu","jalr","beq","bne","bge",
                     "bgeu","blt","bltu","auipc","lui","jal","mul","rst",
                     "halt","rvrs"]
 
