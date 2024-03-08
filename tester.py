@@ -173,6 +173,20 @@ for line in code:
             rs1 = value[2]
             imm = value[3]
             s = decimal_to_binary(imm) + RegAddress[rs1] + funct3[value[0]][0] + RegAddress[rd] + operations[value[0]][0]
+            
+        elif (operations[value[0]][1] == "S"):
+            r1 = value[1]
+            r2 = value[2]
+            imm = value[3]
+            imm_b = str(decimal_to_binary(imm))
+            s = imm_b[:7] + RegAddress[r1] + RegAddress[r2] + funct3[value[0]][0] + imm_b[7:] + operations[value[0]][0]
+    
+        elif (operations[value[0]][1] == "B"):
+            rs1 = value[1]
+            rs2 = value[2]
+            label = value[3]
+            label_b = str(decimal_to_binary(label))
+            s = label_b[:7] + RegAddress[rs2] + RegAddress[rs1] + funct3[value[0]][0] + label_b[7:] + operations[value[0]][0]
 
         elif(operations[value[0]][1] == "U"):
             rd = value[1]
