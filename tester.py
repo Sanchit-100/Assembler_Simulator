@@ -69,7 +69,16 @@ operations = {
    "auipc":["0010111","U"],
    
    # J type instructions
-   "jal":["0010111","J"]
+   "jal":["0010111","J"],
+
+   # Bonus type I instruction
+   "halt":["0000000","H"],
+   # Bonus type II instruction
+   "rst":["0000001","RS"],
+   # Bonus Type III instruction
+   "mul":["0000010","M"],
+   # Bonus type IV instruction
+   "rvrs":["0000011","RV"]
    
 }
 
@@ -117,7 +126,7 @@ funct3={
 }
 
 operations_symbol = ["add","sub","xor","slt","sltu","sll","srl","or","sw",
-                    "and","addi","sltiu","jalr","beq","bne","bge",
+                    "and","addi","lw","sltiu","jalr","beq","bne","bge",
                     "bgeu","blt","bltu","auipc","lui","jal","mul","rst",
                     "halt","rvrs"]
 
@@ -144,14 +153,15 @@ def decimal_to_binary(decimal_num):
 
 #************************************************************************
 def write_binary_to_file(text, filename):
-    
+
+    #open file in binary write mode
     with open(filename, 'a') as file:
-        # Write the binary data to the file
+        # Write the binary data in the 
         file.write(text)
     
     file.close
 
-code=["add x0,x1,x2","sub x0,x1,x2","addi x0,x1,12"]
+code=["add x0,x1,x2","sub x0,x1,x2","addi x0,x1,12","mul x0,x1,x2"]
 for line in code:
 
     value = []
@@ -173,20 +183,22 @@ for line in code:
             rs1 = value[2]
             imm = value[3]
             s = decimal_to_binary(imm) + RegAddress[rs1] + funct3[value[0]][0] + RegAddress[rd] + operations[value[0]][0]
-            
+
         elif (operations[value[0]][1] == "S"):
-            r1 = value[1]
-            r2 = value[2]
-            imm = value[3]
-            imm_b = str(decimal_to_binary(imm))
-            s = imm_b[:7] + RegAddress[r1] + RegAddress[r2] + funct3[value[0]][0] + imm_b[7:] + operations[value[0]][0]
-    
-        elif (operations[value[0]][1] == "B"):
             rs1 = value[1]
-            rs2 = value[2]
-            label = value[3]
-            label_b = str(decimal_to_binary(label))
-            s = label_b[:7] + RegAddress[rs2] + RegAddress[rs1] + funct3[value[0]][0] + label_b[7:] + operations[value[0]][0]
+            imm = value[2]
+            rs2 = value[3]
+            imm1 = decimal_to_binary(imm)[:7]
+            imm2 = decimal_to_binary(imm)[7:]
+            s = imm1 + RegAddress[rs2] + RegAddress[rs1] + "010" + imm2 + "0100011"
+
+        elif (operations[value[0]][1] == "B"):
+            rs1 = value[2]
+            rs2 = value[3]
+            imm = value[1]
+            imm1 = decimal_to_binary(imm)[0] + decimal_to_binary(imm)[2:8]
+            imm2 = decimal_to_binary(imm)[8:12] + decimal_to_binary(imm)[1]
+            s = imm1 + RegAddress[rs2] + RegAddress[rs1] + funct3[value[0]][0] + imm2 + "1100011"
 
         elif(operations[value[0]][1] == "U"):
             rd = value[1]
@@ -197,9 +209,26 @@ for line in code:
             rd = value[1]
             imm = value[2]
             s = decimal_to_binary(imm) + RegAddress[rd] + "0010111"
+
+        elif(operations[value[0]][1] == "H"):
+            s = ""
+
+        elif(operations[value[0]][1] == "RS"):
+            s = ""
+        
+        elif(operations[value[0]][1] == "M"):
+            rd = value[1]
+            rs1 = value[2]
+            rs2 = value[3]
+            s = "0000000" + RegAddress[rs2] + RegAddress[rs1] + "000" + RegAddress[rd] + operations[value[0]][0]
+        
+        elif(operations[value[0]][1] == "RV"):
+            rd = value[1]
+            rs = value[2]
+            s = "0000000" + "00000" + RegAddress[rs] + "000" + RegAddress[rd] + operations[value[0]][0]
     
         
 
         print(s)
         # Open a file in binary write mode
-        write_binary_to_file(s,"stdout.txt")
+        write_binary_to_file(s,"stdout.txt")        
