@@ -141,6 +141,7 @@ for i in range(32):
     registers.append("x"+str(i))
     
 error=False
+line_number=0
 
 
 def decimal_to_binary(decimal_num, size):
@@ -179,11 +180,29 @@ code=["auipe 00000 -20",
 
 for line in code:
 
+    line_number+=1
     value = []
     split_list = re.split(r"\s+|,", line)
     for word in split_list:
         if(word!=""):
             value.append(word)
+
+    #ERROR HANDLING FOR UNSUPPORTED INSTRUCTIONS
+    if (value[0] not in operations_symbol):
+      print(f"Syntax Error at line {line_number}: Unsupported instruction '{value[0]}'")
+      error=True
+      break
+    #ERROR HANDLING FOR TYPOS IN INSTRUCTION OR REGISTER NAME
+    elif len(value)>1 and value[1] not in registers:
+      print(f"Syntax Error at line {line_number}: Invalid register name '{value[1]}'")
+      error=True
+      break
+
+    #ERROR HANDLING FOR INVALID DEFINITION OF LABELS
+    elif len(value)==0:
+        print(f"Syntax Error at line {line_number}: Invalid definition of labels")
+        error=True
+        break
 
     if (value[0] in operations_symbol):
 
