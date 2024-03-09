@@ -142,12 +142,15 @@ for i in range(32):
 error=False
 
 
-def decimal_to_binary(decimal_num):
+def decimal_to_binary(decimal_num, size):
     # Convert decimal to binary using the built-in bin() function
-    binary_str = bin(int(decimal_num))[2:]  # Remove the '0b' prefix
+    if(int(decimal_num) > 0):
+        binary_str = bin(int(decimal_num))[2:]
+        padded_binary_str = binary_str.zfill(size)
 
-    # Pad with leading zeros to ensure a 12-bit representation
-    padded_binary_str = binary_str.zfill(12)
+    else:
+        binary_str = bin(int(decimal_num))[3:]
+        padded_binary_str = "1" + binary_str.zfill(size-1)
 
     return padded_binary_str
 
@@ -161,7 +164,7 @@ def write_binary_to_file(text, filename):
     
     file.close
 
-code=["add x0,x1,x2","sub x0,x1,x2","addi x0,x1,12","mul x0,x1,x2"]
+code=["auipe 00000 -20","sub x0,x1,x2","addi x0,x1,12","mul x0,x1,x2"]
 for line in code:
 
     value = []
@@ -182,39 +185,39 @@ for line in code:
             rd = value[1]
             rs1 = value[2]
             imm = value[3]
-            s = decimal_to_binary(imm) + RegAddress[rs1] + funct3[value[0]][0] + RegAddress[rd] + operations[value[0]][0]
+            s = decimal_to_binary(imm,12) + RegAddress[rs1] + funct3[value[0]][0] + RegAddress[rd] + operations[value[0]][0]
 
         elif (operations[value[0]][1] == "S"):
             rs1 = value[1]
             imm = value[2]
             rs2 = value[3]
-            imm1 = decimal_to_binary(imm)[:7]
-            imm2 = decimal_to_binary(imm)[7:]
+            imm1 = decimal_to_binary(imm,12)[:7]
+            imm2 = decimal_to_binary(imm,12)[7:]
             s = imm1 + RegAddress[rs2] + RegAddress[rs1] + "010" + imm2 + "0100011"
 
         elif (operations[value[0]][1] == "B"):
             rs1 = value[2]
             rs2 = value[3]
             imm = value[1]
-            imm1 = decimal_to_binary(imm)[0] + decimal_to_binary(imm)[2:8]
-            imm2 = decimal_to_binary(imm)[8:12] + decimal_to_binary(imm)[1]
+            imm1 = decimal_to_binary(imm,13)[0] + decimal_to_binary(imm,13)[2:8]
+            imm2 = decimal_to_binary(imm,13)[8:12] + decimal_to_binary(imm,13)[1]
             s = imm1 + RegAddress[rs2] + RegAddress[rs1] + funct3[value[0]][0] + imm2 + "1100011"
 
         elif(operations[value[0]][1] == "U"):
             rd = value[1]
             imm = value[2]
-            s = decimal_to_binary(imm) + RegAddress[rd] + operations[value[0]][0]
+            s = decimal_to_binary(imm,32) + RegAddress[rd] + operations[value[0]][0]
         
         elif(operations[value[0]][1] == "J"):
             rd = value[1]
             imm = value[2]
-            s = decimal_to_binary(imm) + RegAddress[rd] + "0010111"
+            s = decimal_to_binary(imm,21) + RegAddress[rd] + "1101111"
 
         elif(operations[value[0]][1] == "H"):
-            s = ""
+            s = "0000000000000000000000000" + operations[value[0]][0]
 
         elif(operations[value[0]][1] == "RS"):
-            s = ""
+            s = "0000000000000000000000000" + operations[value[0]][0]
         
         elif(operations[value[0]][1] == "M"):
             rd = value[1]
@@ -231,4 +234,4 @@ for line in code:
 
         print(s)
         # Open a file in binary write mode
-        write_binary_to_file(s,"stdout.txt")        
+        # write_binary_to_file(s,"stdout.txt")        
