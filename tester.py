@@ -1,37 +1,38 @@
 import re
 RegAddress = {
-  "x0":"00000",
-  "x1":"00001",
-  "x2":"00010",
-  "x3":"00011",
-  "x4":"00100",
-  "x5":"00101",
-  "x6":"00110",
-  "x7":"00111",
-  "x8":"01000",
-  "x9":"01001",
-  "x10":"01010",
-  "x11":"01011",
-  "x12":"01100",
-  "x13":"01101",
-  "x14":"01110",
-  "x15":"01111",
-  "x16":"10000",
-  "x17":"10001",
-  "x18":"10010",
-  "x19":"10011",
-  "x20":"10100",
-  "x21":"10101",
-  "x22":"10110",
-  "x23":"10111",
-  "x24":"11000",
-  "x25":"11001",
-  "x26":"11010",
-  "x27":"11011",
-  "x28":"11100",
-  "x29":"11101",
-  "x30":"11110",
-  "x31":"11111"
+  "zero":"00000", #x0
+  "ra":"00001",   #x1
+  "sp":"00010",   #x2
+  "gp":"00011",   #x3
+  "tp":"00100",   #x4
+  "t0":"00101",   #x5
+  "t1":"00110",   #x6
+  "t2":"00111",   #x7
+  "fp":"01000",   #x8
+  "s0":"01000",   #x8
+  "s1":"01001",   #x9
+  "a0":"01010",   #x10
+  "a1":"01011",   #x11
+  "a2":"01100",   #x12
+  "a3":"01101",   #x13
+  "a4":"01110",   #x14
+  "a5":"01111",   #x15
+  "a6":"10000",   #x16
+  "a7":"10001",   #x17
+  "s2":"10010",   #x18
+  "s3":"10011",   #x19
+  "s4":"10100",   #x20
+  "s5":"10101",   #x21
+  "s6":"10110",   #x22
+  "s7":"10111",   #x23
+  "s8":"11000",   #x24
+  "s9":"11001",   #x25
+  "s10":"11010",  #x26
+  "s11":"11011",  #x28
+  "t3":"11100",   #x29
+  "t4":"11101",   #x30
+  "t5":"11110",   #x31
+  "t6":"11111"    #x32
 }
 
 
@@ -144,7 +145,7 @@ error=False
 
 def decimal_to_binary(decimal_num, size):
     # Convert decimal to binary using the built-in bin() function
-    if(int(decimal_num) > 0):
+    if(int(decimal_num) >= 0):
         binary_str = bin(int(decimal_num))[2:]
         padded_binary_str = binary_str.zfill(size)
 
@@ -164,7 +165,18 @@ def write_binary_to_file(text, filename):
     
     file.close
 
-code=["auipe 00000 -20","sub x0,x1,x2","addi x0,x1,12","mul x0,x1,x2"]
+code=["auipe 00000 -20",
+      "sub t1,s0,a0",
+      "sll a1,t2,t3",
+      "slt s1,a2,s2",
+      "sltu s3,a3,s4",
+      "xor s5,a4,s6",
+      "srl s7,a5,s8",
+      "or s9,a6,s10",
+      "and s11,a7,s0",
+      "beq zero,zero,0"]
+
+
 for line in code:
 
     value = []
@@ -196,9 +208,9 @@ for line in code:
             s = imm1 + RegAddress[rs2] + RegAddress[rs1] + "010" + imm2 + "0100011"
 
         elif (operations[value[0]][1] == "B"):
-            rs1 = value[2]
-            rs2 = value[3]
-            imm = value[1]
+            rs1 = value[1]
+            rs2 = value[2]
+            imm = value[3]
             imm1 = decimal_to_binary(imm,13)[0] + decimal_to_binary(imm,13)[2:8]
             imm2 = decimal_to_binary(imm,13)[8:12] + decimal_to_binary(imm,13)[1]
             s = imm1 + RegAddress[rs2] + RegAddress[rs1] + funct3[value[0]][0] + imm2 + "1100011"
