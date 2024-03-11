@@ -232,7 +232,7 @@ for line in code:
     elif operations[value[0]][1] == "I":
         if len(value) < 4:
             # If the instruction is missing an immediate value
-            print("Error: Missing immediate value at line", line_number)
+            # print("Error: Missing immediate value at line", line_number)
             break
         elif value[0] == "lw":
             rd = value[1]
@@ -318,7 +318,7 @@ for line in code:
         
             if check_string(imm)==0:
                 label_name = imm
-                label_value = label_dict[label_name]-PC
+                label_value = PC-label_dict[label_name]
             
             else:
                 label_value=imm
@@ -344,7 +344,7 @@ for line in code:
             
             if check_string(comma_sep[1])==0:
                 label_name = comma_sep[1]
-                label_value = label_dict[label_name]-PC
+                label_value = PC-label_dict[label_name]
             
             else:
                 label_value=comma_sep[1]
