@@ -130,10 +130,8 @@ operations_symbol = ["add","sub","xor","slt","sltu","sll","srl","or","sw",
                     "bgeu","blt","bltu","auipc","lui","jal","mul","rst",
                     "halt","rvrs"]
 
-registers = []
 
-for i in range(32):
-    registers.append("x"+str(i))
+registers=["zero","ra","sp","gp","tp","t0","t1","t2","s0","fp","s1","a0","a1","a2","a3","a4","a5","a6","a7","s2","s3","s4","s5","s6" ,"s7","s8","s9","s10","s11","t3","t4","t5","t6"]
     
 # --------------------------------------------------------------
 # Some helper functions
@@ -219,23 +217,23 @@ for line in code:
     # Error handling for invalid labels
     if not value:
         print("Error: Invalid definition of labels at line", line_number)
-        continue
+        break
 
     # Error handling for unsupported instructions
     if value[0] not in operations_symbol:
         print("Syntax Error at line", line_number, ": Unsupported instruction '", value[0], "'", sep="")
-        continue
+        break
 
     # Error handling for invalid register names or operands
     if len(value) > 1 and value[1] not in registers:
         print("Syntax Error at line", line_number, ": Invalid register name '", value[1], "'", sep="")
-        continue
-    
+        break
+
     elif operations[value[0]][1] == "I":
         if len(value) < 4:
             # If the instruction is missing an immediate value
             print("Error: Missing immediate value at line", line_number)
-            continue
+            break
         elif value[0] == "lw":
             rd = value[1]
             imm_and_rs = value[2]
@@ -245,7 +243,7 @@ for line in code:
             if not (-2048 <= int(imm) <= 2047):
                 # If the immediate value is out of bounds
                 print("Error: Immediate value out of bounds at line", line_number)
-                continue
+                break
             temp_bin = decimal_to_binary(imm, 12)
             s = temp_bin + RegAddress[rs] + funct3[value[0]][0] + RegAddress[rd] + operations[value[0]][0]
         else:
@@ -255,7 +253,7 @@ for line in code:
             if not (-2048 <= int(imm) <= 2047):
                 # If the immediate value is out of bounds, as it is 12 bit
                 print("Error: Immediate value out of bounds at line", line_number)
-                continue
+                break
             final_imm = decimal_to_binary(imm, 12)
             s = final_imm + RegAddress[rs1] + funct3[value[0]][0] + RegAddress[rd] + operations[value[0]][0]
 
