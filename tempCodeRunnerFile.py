@@ -1,1 +1,1 @@
-write_binary_to_file(s,"stdout.txt")
+print(code)

@@ -1,26 +1,46 @@
-# uncomment these 2 lines for taking input through console
-import sys                                    
-code = sys.stdin.read().splitlines()
+# Dictionaries and stuff
+# -----------------------------------------------------------
 
-# uncomment these 2 lines if you want to read your own input file
+import re
+import sys
 
-with open('test1.txt') as f:
-    code = f.read().splitlines()
-
-
-# ACTUAL CODE STARTS FORM HERE  
-
-# Store here the binary values of each register
+sys.path.append('.')
 RegAddress = {
-  "R0":"000",
-  "R1":"001",
-  "R2":"010",
-  "R3":"011",
-  "R4":"100",
-  "R5":"101",
-  "R6":"110",
-  "FLAGS":"111"
+  "zero":"00000", #x0
+  "ra":"00001",   #x1
+  "sp":"00010",   #x2
+  "gp":"00011",   #x3
+  "tp":"00100",   #x4
+  "t0":"00101",   #x5
+  "t1":"00110",   #x6
+  "t2":"00111",   #x7
+  "fp":"01000",   #x8
+  "s0":"01000",   #x8
+  "s1":"01001",   #x9
+  "a0":"01010",   #x10
+  "a1":"01011",   #x11
+  "a2":"01100",   #x12
+  "a3":"01101",   #x13
+  "a4":"01110",   #x14
+  "a5":"01111",   #x15
+  "a6":"10000",   #x16
+  "a7":"10001",   #x17
+  "s2":"10010",   #x18
+  "s3":"10011",   #x19
+  "s4":"10100",   #x20
+  "s5":"10101",   #x21
+  "s6":"10110",   #x22
+  "s7":"10111",   #x23
+  "s8":"11000",   #x24
+  "s9":"11001",   #x25
+  "s10":"11010",  #x26
+  "s11":"11011",  #x28
+  "t3":"11100",   #x29
+  "t4":"11101",   #x30
+  "t5":"11110",   #x31
+  "t6":"11111"    #x32
 }
+
 
 
 operations = {
@@ -104,182 +124,205 @@ funct3={
    "bgeu":["111","B"],
 }
 
-operations_symbol = ["add","sub","xor","slt","sltu","sll","srl","or",
-                    "and","addi","sltiu","jalr","beq","bne","bge",
+operations_symbol = ["add","sub","xor","slt","sltu","sll","srl","or","sw",
+                    "and","addi","lw","sltiu","jalr","beq","bne","bge",
                     "bgeu","blt","bltu","auipc","lui","jal","mul","rst",
                     "halt","rvrs"]
 
 
 
+# creating the dictionary for ABI names
+# Here key is the ABI and corresponding value
+# is the register name like x_
 
+# ABI_names={
+#     "zero":"x0",
+#     "ra" : "x1",
+#     "sp":"x2",
+#     "gp" : "x3",
+#     "tp":"x4",
+#     "t0" : "x5",
+#     "t1":"x6",
+#     "t2" : "x7",
+#     "s0":"x8",
+#     "fp" : "x8",
+#     "s1":"x9",
+#     "a0" : "x10",
+#     "a1":"x11",
+#     "a2" : "x12",
+#     "a3":"x13",
+#     "a4" : "x14",
+#     "a5":"x15",
+#     "a6" : "x16",
+#     "a7":"x17",
+#     "s2" : "x18",
+#     "s3":"x19",
+#     "s4" : "x20",
+#     "s5":"x21",
+#     "s6" : "x22",
+#     "s7":"x23",
+#     "s8" : "x24",
+#     "s9":"x25",
+#     "s10" : "x26",
+#     "s11":"x27",
+#     "t3" : "x28",
+#     "t4":"x29",
+#     "t5" : "30",
+#     "t6":"x31"
 
+# }
 registers = []
 
 for i in range(32):
     registers.append("x"+str(i))
     
-error=False
+# --------------------------------------------------------------
+# Some helper functions
 
-#**************************** THIS FUNCTION HANDLES ALL ERROR CASES OF TYPE R *******************************************#
-def type_R(value):
-    global error
-    if(len(value)!=4):
-        print("line no" , line_no , " wrong syntax used for", value[0],"instruction",sep=' ' )
-        error=True
-        return
-
-    for i in range(1,len(value)):
-
-        if(value[i] not in registers):
-            print("line no" , line_no ,'(',value[i],')', "is invalid register name ",sep=' ')
-            error=True
-            
-#****************************************************************************
-def decimal_to_binary(decimal_num):
+def decimal_to_binary(decimal_num, size):
     # Convert decimal to binary using the built-in bin() function
-    binary_str = bin(decimal_num)[2:]  # Remove the '0b' prefix
+    if(int(decimal_num) >= 0):
+        binary_str = bin(int(decimal_num))[2:]
+        padded_binary_str = binary_str.zfill(size)
 
-    # Pad with leading zeros to ensure a 12-bit representation
-    padded_binary_str = binary_str.zfill(12)
+    else:
+        binary_str = bin(int(decimal_num))[3:]
+        padded_binary_str = "1" + binary_str.zfill(size-1)
 
     return padded_binary_str
 
+
 #************************************************************************
-def write_binary_to_file(binary_value, filename):
-    # Convert the binary string to bytes
-    binary_bytes = int(binary_value, 2)
-
-    # Open the file in binary write mode
-    with open(filename, 'wb') as file:
-        # Write the binary data to the file
-        file.write(binary_bytes)
-        
-
-#****************************************************************************
-
-# HANDLING ALL CASES OF NORMAL INSTRUCTIONS
-line_no=0                                                      
-for line in code:
-    line_no+=1
-    if(len(line)==0):
-        continue
-
-
-    result = line.split()
-    value=[word.rstrip(',') for word in result]
-    # value contains the list for all the elements of an instruction
-
-
-
-    if(len(value)==0):
-        print("line no", line_no , "invalid defnation of labels",sep=' ')
-        error=True
-        continue
-    
-    if(value[0] not in operations_symbol):
-        print("line no",line_no , '(',value[0],')'," is invalid instruction name ", sep=' ')
-        error=True
-        continue
-
-    if(value[0]=="mov" and len(value)>=2):
-        c = value[2][0]
-        if(65<=ord(c)<=90 or 97<=ord(c)<=122):
-            value[0]="mov2"
-        else:
-            value[0]="mov1"
-    
-    if (operations[value[0]][1] == "R"):
-        type_R(value)
-            
-    elif (operations[value[0]][1] == "C"):
-        type_C(value)
-        
-    elif (operations[value[0]][1] == "B"):
-        type_B(value)
-
-    elif (operations[value[0]][1] == "D"):
-        type_D(value)
-    
-    elif (operations[value[0]][1] == "E"):
-        type_E(value)
-
-    elif (operations[value[0]][1] == "F"):
-        type_F(value)
-
+def check_string(s):
+    if (s.startswith('-') and s[1:].isdigit()) or s.isdigit():
+        return 1;  # "The string is numeric."
     else:
-        print("line no",line_no,"invalid syntax",sep=' ')
-        error=True
-
-
-
-#********************************************************************************************************************************************
-# THIS IS ASSEMBLER THIS WILL RUN ONLY WHEN THERE ARE NO ERRORS IN THE ASSEMBLY CODE 
-
-labels={}
-variables={}
-
-t=1
-address=-1
-
-if(error==True):
-    exit()
-
-
-#*********************************THIS LOOP WILL STORE THE ADDRESS OF ALL VARIABLES IN DICTIONARY*******************
-for line in code:
-    if len(line)==0:
-        continue
-    value = list(line.split())
+        return 0;    # "The string is alphabetical."
+#******************************************************************
+def write_binary_to_file(text, filename):
     
-    if(value[0] in operations_symbol):
-        address+=1
+    with open(filename, 'a') as file:
+        # Write the binary data to the file
+        file.write(text)
+    
+    file.close
 
-    if value[0]=="hlt":
-        labels[value[0]+":"]=address
+# ------------------------------------------------------------------
 
-    if(value[0][-1]==":"):
-        address+=1
-        labels[value[0]]=address
-        
+with open(sys.argv[1], 'r') as file:
+    # Write the binary data to the file
+    code = file.read().splitlines()
 
-#********************************* THIS LOOP WILL STORE THE ADDRESS OF ALL LABELS IN DICTIONARY ********************
+
+# creating dictionary for addresses of labels
+# ****************************************************************
+label_dict={}
+line_address=0
 for line in code:
-    if(len(line)==0):
-        continue
-    value = list(line.split())
-    if value[0]=="var" and len(value)==2:
-        variables[value[1]]=t+address
-        t+=1
+    temp_list=line.split(':')
+    if(len(temp_list)==2):
+        label_dict[temp_list[0]]=line_address
+    line_address+=4
 
+for i in label_dict.keys():
+    print(i,"-> ", label_dict[i])
 
-#********************************* THIS IS MAIN LOOP TO COVERT ASSEMBLY INTO BINARY CODE *******************************
+# By now, we have created a dictionary of labels 
+# where the key is the name of the label and
+# and the corresponding is the address
+# ******************************************************************
+
+# Main code starts from below
+
+# Program counter        
+PC=0
 for line in code:
 
-    if(len(line)==0):
-        continue
-
-    value = list(line.split())
+    temp_list=line.split(':')
+    if(len(temp_list)==2):
+        line=temp_list[1]
+    
+    value = []
+    split_list = re.split(r"\s+|,", line)
+    for word in split_list:
+        if(word!=""):
+            value.append(word)
 
     if (value[0] in operations_symbol):
 
         if (operations[value[0]][1] == "R"):
-            r1 = value[1]
-            r2 = value[2]
-            r3 = value[3]
-            s = operations[value[0]][0] + RegAddress[r1] + RegAddress[r2] + RegAddress[r3]
+            rd = value[1]
+            rs1 = value[2]
+            rs2 = value[3]
+            s = funct7[value[0]][0] + RegAddress[rs2] + RegAddress[rs1] + funct3[value[0]][0] + RegAddress[rd] + operations[value[0]][0]
 
         elif (operations[value[0]][1] == "I"):
-            r1 = value[1]
-            r2 = value[2]
-            imm = value[3]
-            s = operations[value[0]][0] + RegAddress[r1] + RegAddress[r2] + decimal_to_binary(imm)
+            if value[0]=="lw":
+                rd = value[1]
+                imm_and_rs=value[2]
+                temp=imm_and_rs.split('(')
+                imm=temp[0]
+                rs=temp[1].rstrip(')')
+                
+                temp_bin=decimal_to_binary(imm,12)
+                
+                s=temp_bin + RegAddress[rs] + funct3[value[0]][0] + RegAddress[rd]+ operations[value[0]][0]
+            
+            else:
+                
+                rd = value[1]
+                rs1 = value[2]
+                imm = value[3]
+                final_imm=decimal_to_binary(imm,12)
+                s = final_imm + RegAddress[rs1] + funct3[value[0]][0] + RegAddress[rd] + operations[value[0]][0]
 
+        elif operations[value[0]][1] == "S":
+                rd = value[1]
+                imm_and_rs=value[2]
+                temp=imm_and_rs.split('(')
+                imm=temp[0]
+                rs=temp[1].rstrip(')')
+                
+                temp_bin=decimal_to_binary(imm,12)
+                
+                s=temp_bin[0:7]+ RegAddress[rd] + RegAddress[rs] + funct3[value[0]][0] + temp_bin[7:12] + operations[value[0]][0]
+
+        elif (operations[value[0]][1] == "B"):
+            rs1 = value[1]
+            rs2 = value[2]
+            imm = value[3]
+            imm1 = decimal_to_binary(imm,13)[0] + decimal_to_binary(imm,13)[2:8]
+            imm2 = decimal_to_binary(imm,13)[8:12] + decimal_to_binary(imm,13)[1]
+            s = imm1 + RegAddress[rs2] + RegAddress[rs1] + funct3[value[0]][0] + imm2 + "1100011"
+
+        elif(operations[value[0]][1] == "U"):
+            rd = value[1]
+            imm = value[2]
+            final_imm=decimal_to_binary(imm,32)
+            s = final_imm[0:20] + RegAddress[rd] + operations[value[0]][0]
+                
+        elif(operations[value[0]][1] == "J"):
+            comma_sep=line.split(',')
+            
+            rd = (comma_sep[0].split())[1]
+            
+            # checking if directly immediate is given
+            # or a label_name is given
+            
+            if check_string(comma_sep[1])==0:
+                label_name = comma_sep[1]
+                label_value = label_dict[label_name]-PC
+            
+            else:
+                label_value=comma_sep[1]
+            
+            temp_imm = decimal_to_binary(label_value,21)
+            final_imm= temp_imm[0] + temp_imm[10:20] + temp_imm[9] + temp_imm[1:9]
+            s = final_imm + RegAddress[rd] + "0010111"
+    
+    
         print(s)
         # Open a file in binary write mode
-        write_binary_to_file(s,"stdout.bin")
-
-# The file is automatically closed after the 'with' block
-
-
-
-# ********************************THE END*********************************************************************
+        write_binary_to_file(s,sys.argv[2])
+        write_binary_to_file('\n',sys.argv[2])
+        PC+=4

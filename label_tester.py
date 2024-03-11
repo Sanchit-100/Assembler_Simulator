@@ -2,40 +2,45 @@
 # -----------------------------------------------------------
 
 import re
+import sys
+
+sys.path.append('.')
 RegAddress = {
-  "x0":"00000",
-  "x1":"00001",
-  "x2":"00010",
-  "x3":"00011",
-  "x4":"00100",
-  "x5":"00101",
-  "x6":"00110",
-  "x7":"00111",
-  "x8":"01000",
-  "x9":"01001",
-  "x10":"01010",
-  "x11":"01011",
-  "x12":"01100",
-  "x13":"01101",
-  "x14":"01110",
-  "x15":"01111",
-  "x16":"10000",
-  "x17":"10001",
-  "x18":"10010",
-  "x19":"10011",
-  "x20":"10100",
-  "x21":"10101",
-  "x22":"10110",
-  "x23":"10111",
-  "x24":"11000",
-  "x25":"11001",
-  "x26":"11010",
-  "x27":"11011",
-  "x28":"11100",
-  "x29":"11101",
-  "x30":"11110",
-  "x31":"11111"
+  "zero":"00000", #x0
+  "ra":"00001",   #x1
+  "sp":"00010",   #x2
+  "gp":"00011",   #x3
+  "tp":"00100",   #x4
+  "t0":"00101",   #x5
+  "t1":"00110",   #x6
+  "t2":"00111",   #x7
+  "fp":"01000",   #x8
+  "s0":"01000",   #x8
+  "s1":"01001",   #x9
+  "a0":"01010",   #x10
+  "a1":"01011",   #x11
+  "a2":"01100",   #x12
+  "a3":"01101",   #x13
+  "a4":"01110",   #x14
+  "a5":"01111",   #x15
+  "a6":"10000",   #x16
+  "a7":"10001",   #x17
+  "s2":"10010",   #x18
+  "s3":"10011",   #x19
+  "s4":"10100",   #x20
+  "s5":"10101",   #x21
+  "s6":"10110",   #x22
+  "s7":"10111",   #x23
+  "s8":"11000",   #x24
+  "s9":"11001",   #x25
+  "s10":"11010",  #x26
+  "s11":"11011",  #x28
+  "t3":"11100",   #x29
+  "t4":"11101",   #x30
+  "t5":"11110",   #x31
+  "t6":"11111"    #x32
 }
+
 
 
 operations = {
@@ -130,42 +135,42 @@ operations_symbol = ["add","sub","xor","slt","sltu","sll","srl","or","sw",
 # Here key is the ABI and corresponding value
 # is the register name like x_
 
-ABI_names={
-    "zero":"x0",
-    "ra" : "x1",
-    "sp":"x2",
-    "gp" : "x3",
-    "tp":"x4",
-    "t0" : "x5",
-    "t1":"x6",
-    "t2" : "x7",
-    "s0":"x8",
-    "fp" : "x8",
-    "s1":"x9",
-    "a0" : "x10",
-    "a1":"x11",
-    "a2" : "x12",
-    "a3":"x13",
-    "a4" : "x14",
-    "a5":"x15",
-    "a6" : "x16",
-    "a7":"x17",
-    "s2" : "x18",
-    "s3":"x19",
-    "s4" : "x20",
-    "s5":"x21",
-    "s6" : "x22",
-    "s7":"x23",
-    "s8" : "x24",
-    "s9":"x25",
-    "s10" : "x26",
-    "s11":"x27",
-    "t3" : "x28",
-    "t4":"x29",
-    "t5" : "30",
-    "t6":"x31"
+# ABI_names={
+#     "zero":"x0",
+#     "ra" : "x1",
+#     "sp":"x2",
+#     "gp" : "x3",
+#     "tp":"x4",
+#     "t0" : "x5",
+#     "t1":"x6",
+#     "t2" : "x7",
+#     "s0":"x8",
+#     "fp" : "x8",
+#     "s1":"x9",
+#     "a0" : "x10",
+#     "a1":"x11",
+#     "a2" : "x12",
+#     "a3":"x13",
+#     "a4" : "x14",
+#     "a5":"x15",
+#     "a6" : "x16",
+#     "a7":"x17",
+#     "s2" : "x18",
+#     "s3":"x19",
+#     "s4" : "x20",
+#     "s5":"x21",
+#     "s6" : "x22",
+#     "s7":"x23",
+#     "s8" : "x24",
+#     "s9":"x25",
+#     "s10" : "x26",
+#     "s11":"x27",
+#     "t3" : "x28",
+#     "t4":"x29",
+#     "t5" : "30",
+#     "t6":"x31"
 
-}
+# }
 registers = []
 
 for i in range(32):
@@ -174,16 +179,26 @@ for i in range(32):
 # --------------------------------------------------------------
 # Some helper functions
 
-def decimal_to_binary(decimal_num):
+def decimal_to_binary(decimal_num, size):
     # Convert decimal to binary using the built-in bin() function
-    binary_str = bin(int(decimal_num))[2:]  # Remove the '0b' prefix
+    if(int(decimal_num) >= 0):
+        binary_str = bin(int(decimal_num))[2:]
+        padded_binary_str = binary_str.zfill(size)
 
-    # Pad with leading zeros to ensure a 12-bit representation
-    padded_binary_str = binary_str.zfill(12)
+    else:
+        binary_str = bin(int(decimal_num))[3:]
+        padded_binary_str = "1" + binary_str.zfill(size-1)
 
     return padded_binary_str
 
+
 #************************************************************************
+def check_string(s):
+    if (s.startswith('-') and s[1:].isdigit()) or s.isdigit():
+        return 1;  # "The string is numeric."
+    else:
+        return 0;    # "The string is alphabetical."
+#******************************************************************
 def write_binary_to_file(text, filename):
     
     with open(filename, 'a') as file:
@@ -194,7 +209,7 @@ def write_binary_to_file(text, filename):
 
 # ------------------------------------------------------------------
 
-with open('sample_test.txt', 'r') as file:
+with open("test1.txt", 'r') as file:
     # Write the binary data to the file
     code = file.read().splitlines()
 
@@ -239,44 +254,87 @@ for line in code:
             rd = value[1]
             rs1 = value[2]
             rs2 = value[3]
-            s = funct7[value[0]][0] + RegAddress[ABI_names[rs2]] + RegAddress[ABI_names[rs1]] + funct3[value[0]][0] + RegAddress[ABI_names[rd]] + operations[value[0]][0]
+            s = funct7[value[0]][0] + RegAddress[rs2] + RegAddress[rs1] + funct3[value[0]][0] + RegAddress[rd] + operations[value[0]][0]
 
         elif (operations[value[0]][1] == "I"):
-            rd = value[1]
-            rs1 = value[2]
+            if value[0]=="lw":
+                rd = value[1]
+                imm_and_rs=value[2]
+                temp=imm_and_rs.split('(')
+                imm=temp[0]
+                rs=temp[1].rstrip(')')
+                
+                temp_bin=decimal_to_binary(imm,12)
+                
+                s=imm[0:11]+ RegAddress[rs] + funct3[value[0]][0] + RegAddress[rd]+ operations[value[0]][0]
+            
+            else:
+                
+                rd = value[1]
+                rs1 = value[2]
+                imm = value[3]
+                s = decimal_to_binary(imm,12) + RegAddress[rs1] + funct3[value[0]][0] + RegAddress[rd] + operations[value[0]][0]
+
+        elif operations[value[0]][1] == "S":
+                rd = value[1]
+                imm_and_rs=value[2]
+                temp=imm_and_rs.split('(')
+                imm=temp[0]
+                rs=temp[1].rstrip(')')
+                
+                temp_bin=decimal_to_binary(imm)
+                
+                s=imm[11:5]+ RegAddress[rd] + RegAddress[rs] + funct3[value[0]][0] + imm[4:0] + operations[value[0]][0]
+
+        elif (operations[value[0]][1] == "B"):
+            rs1 = value[1]
+            rs2 = value[2]
             imm = value[3]
-            s = decimal_to_binary(imm) + RegAddress[ABI_names[rs1]] + funct3[value[0]][0] + RegAddress[ABI_names[rd]] + operations[value[0]][0]
+            imm1 = decimal_to_binary(imm,13)[0] + decimal_to_binary(imm,13)[2:8]
+            imm2 = decimal_to_binary(imm,13)[8:12] + decimal_to_binary(imm,13)[1]
+            s = imm1 + RegAddress[rs2] + RegAddress[rs1] + funct3[value[0]][0] + imm2 + "1100011"
 
         elif(operations[value[0]][1] == "U"):
             rd = value[1]
             imm = value[2]
-            s = decimal_to_binary(imm) + RegAddress[ABI_names[rd]] + operations[value[0]][0]
-        
+            s = decimal_to_binary(imm,32) + RegAddress[rd] + operations[value[0]][0]
+                
         elif(operations[value[0]][1] == "J"):
             comma_sep=line.split(',')
             
             rd = (comma_sep[0].split())[1]
-            label_name = comma_sep[1]
-            label_value = label_dict[label_name]-PC
+            
+            # checking if directly immediate is given
+            # or a label_name is given
+            
+            if check_string(comma_sep[1])==0:
+                label_name = comma_sep[1]
+                label_value = label_dict[label_name]-PC
+                
+                temp_imm = decimal_to_binary(label_value)
+                final_imm= temp_imm[20] + temp_imm[10:1] + temp_imm[11] + temp_imm[19:12]
+                s = final_imm + RegAddress[rd] + "0010111"
+            
+            else:
+                label_value=comma_sep[1]
             
             temp_imm = decimal_to_binary(label_value)
             final_imm= temp_imm[20] + temp_imm[10:1] + temp_imm[11] + temp_imm[19:12]
-            s = final_imm + RegAddress[ABI_names[rd]] + "0010111"
+            s = final_imm + RegAddress[rd] + "0010111"
         
-        elif operations[value[0]][1] == "S":
-            rd = value[1]
-            imm_and_rs=value[2]
-            temp=imm_and_rs.split('(')
-            imm=temp[0]
-            rs=temp[1].rstrip(')')
-            
-            temp_bin=decimal_to_binary(imm)
-            
-            s=imm[11:5]+ RegAddress[ABI_names[rd]] + RegAddress[ABI_names[rs]] + funct3[value[0]][0] + imm[4:0] + operations[value[0]][0]
+        elif (operations[value[0]][1] == "B"):
+            rs1 = value[1]
+            rs2 = value[2]
+            imm = value[3]
+            imm1 = decimal_to_binary(imm,13)[0] + decimal_to_binary(imm,13)[2:8]
+            imm2 = decimal_to_binary(imm,13)[8:12] + decimal_to_binary(imm,13)[1]
+            s = imm1 + RegAddress[rs2] + RegAddress[rs1] + funct3[value[0]][0] + imm2 + "1100011"
+
         
     
     
         print(s)
         # Open a file in binary write mode
         write_binary_to_file(s,"stdout.txt")
+        write_binary_to_file('\n',"stdout.txt")
         PC+=4
