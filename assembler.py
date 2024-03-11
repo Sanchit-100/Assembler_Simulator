@@ -130,48 +130,6 @@ operations_symbol = ["add","sub","xor","slt","sltu","sll","srl","or","sw",
                     "bgeu","blt","bltu","auipc","lui","jal","mul","rst",
                     "halt","rvrs"]
 
-
-
-# creating the dictionary for ABI names
-# Here key is the ABI and corresponding value
-# is the register name like x_
-
-# ABI_names={
-#     "zero":"x0",
-#     "ra" : "x1",
-#     "sp":"x2",
-#     "gp" : "x3",
-#     "tp":"x4",
-#     "t0" : "x5",
-#     "t1":"x6",
-#     "t2" : "x7",
-#     "s0":"x8",
-#     "fp" : "x8",
-#     "s1":"x9",
-#     "a0" : "x10",
-#     "a1":"x11",
-#     "a2" : "x12",
-#     "a3":"x13",
-#     "a4" : "x14",
-#     "a5":"x15",
-#     "a6" : "x16",
-#     "a7":"x17",
-#     "s2" : "x18",
-#     "s3":"x19",
-#     "s4" : "x20",
-#     "s5":"x21",
-#     "s6" : "x22",
-#     "s7":"x23",
-#     "s8" : "x24",
-#     "s9":"x25",
-#     "s10" : "x26",
-#     "s11":"x27",
-#     "t3" : "x28",
-#     "t4":"x29",
-#     "t5" : "30",
-#     "t6":"x31"
-
-# }
 registers = []
 
 for i in range(32):
@@ -184,13 +142,23 @@ def decimal_to_binary(decimal_num, size):
     # Convert decimal to binary using the built-in bin() function
     if(int(decimal_num) >= 0):
         binary_str = bin(int(decimal_num))[2:]
-        padded_binary_str = binary_str.zfill(size)
+        binary_str = binary_str.zfill(size)
 
     else:
         binary_str = bin(int(decimal_num))[3:]
-        padded_binary_str = "1" + binary_str.zfill(size-1)
+        bin_str = binary_str.zfill(size)
 
-    return padded_binary_str
+        binary_str = "".join(["1" if bit == "0" else "0" for bit in bin_str])
+        carry = 1
+        for i in range(len(binary_str) - 1, -1, -1):
+            if carry == 1:
+                if binary_str[i] == "0":
+                    binary_str = binary_str[:i] + "1" + binary_str[i + 1:]
+                    carry = 0
+                else:
+                    binary_str = binary_str[:i] + "0" + binary_str[i + 1:]
+
+    return binary_str
 
 
 #************************************************************************
@@ -235,6 +203,62 @@ for i in label_dict.keys():
 # ******************************************************************
 
 # Main code starts from below
+line_number = 0
+for line in code:
+    line_number +=1
+    temp_list=line.split(':')
+    if(len(temp_list)==2):
+        line=temp_list[1]
+    
+    value = []
+    split_list = re.split(r"\s+|,", line)
+    for word in split_list:
+        if(word!=""):
+            value.append(word)
+
+    # Error handling for invalid labels
+    if not value:
+        print("Error: Invalid definition of labels at line", line_number)
+        continue
+
+    # Error handling for unsupported instructions
+    if value[0] not in operations_symbol:
+        print("Syntax Error at line", line_number, ": Unsupported instruction '", value[0], "'", sep="")
+        continue
+
+    # Error handling for invalid register names or operands
+    if len(value) > 1 and value[1] not in registers:
+        print("Syntax Error at line", line_number, ": Invalid register name '", value[1], "'", sep="")
+        continue
+    
+    elif operations[value[0]][1] == "I":
+        if len(value) < 4:
+            # If the instruction is missing an immediate value
+            print("Error: Missing immediate value at line", line_number)
+            continue
+        elif value[0] == "lw":
+            rd = value[1]
+            imm_and_rs = value[2]
+            temp = imm_and_rs.split('(')
+            imm = temp[0]
+            rs = temp[1].rstrip(')')
+            if not (-2048 <= int(imm) <= 2047):
+                # If the immediate value is out of bounds
+                print("Error: Immediate value out of bounds at line", line_number)
+                continue
+            temp_bin = decimal_to_binary(imm, 12)
+            s = temp_bin + RegAddress[rs] + funct3[value[0]][0] + RegAddress[rd] + operations[value[0]][0]
+        else:
+            rd = value[1]
+            rs1 = value[2]
+            imm = value[3]
+            if not (-2048 <= int(imm) <= 2047):
+                # If the immediate value is out of bounds, as it is 12 bit
+                print("Error: Immediate value out of bounds at line", line_number)
+                continue
+            final_imm = decimal_to_binary(imm, 12)
+            s = final_imm + RegAddress[rs1] + funct3[value[0]][0] + RegAddress[rd] + operations[value[0]][0]
+
 
 # Program counter        
 PC=0
@@ -318,7 +342,7 @@ for line in code:
             else:
                 label_value=comma_sep[1]
             
-            temp_imm = decimal_to_binary(label_value,21)
+            temp_imm = str(decimal_to_binary(label_value,21))
             final_imm= temp_imm[0] + temp_imm[10:20] + temp_imm[9] + temp_imm[1:9]
             s = final_imm + RegAddress[rd] + operations[value[0]][0]
     
