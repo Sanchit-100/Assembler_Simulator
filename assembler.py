@@ -77,8 +77,9 @@ operations = {
    "auipc":["0010111","U"],
    
    # J type instructions
-   "jal":["0010111","J"]
+   "jal":["1101111","J"]
    
+
 }
 
 funct7={
@@ -212,6 +213,7 @@ def write_binary_to_file(text, filename):
 with open(sys.argv[1], 'r') as file:
     # Write the binary data to the file
     code = file.read().splitlines()
+    file.close()
 
 
 # creating dictionary for addresses of labels
@@ -318,7 +320,7 @@ for line in code:
             
             temp_imm = decimal_to_binary(label_value,21)
             final_imm= temp_imm[0] + temp_imm[10:20] + temp_imm[9] + temp_imm[1:9]
-            s = final_imm + RegAddress[rd] + "0010111"
+            s = final_imm + RegAddress[rd] + operations[value[0]][0]
     
     
         print(s)
