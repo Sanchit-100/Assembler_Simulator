@@ -317,7 +317,7 @@ for line in code:
             imm=value[3]
         
             if check_string(imm)==0:
-                label_name = comma_sep[1]
+                label_name = imm
                 label_value = label_dict[label_name]-PC
             
             else:
