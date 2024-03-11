@@ -314,7 +314,16 @@ for line in code:
         elif (operations[value[0]][1] == "B"):
             rs1 = value[1]
             rs2 = value[2]
-            imm = value[3]
+            imm=value[3]
+        
+            if check_string(imm)==0:
+                label_name = comma_sep[1]
+                label_value = label_dict[label_name]-PC
+            
+            else:
+                label_value=imm
+
+            imm = label_value
             imm1 = decimal_to_binary(imm,13)[0] + decimal_to_binary(imm,13)[2:8]
             imm2 = decimal_to_binary(imm,13)[8:12] + decimal_to_binary(imm,13)[1]
             s = imm1 + RegAddress[rs2] + RegAddress[rs1] + funct3[value[0]][0] + imm2 + "1100011"
