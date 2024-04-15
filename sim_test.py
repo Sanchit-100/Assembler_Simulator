@@ -83,8 +83,13 @@ def decimalToUBinary(num):      #takes a integer and converts it to a unsigned b
 def UbinToInt(binary_string):   #takes a unsigned binary number of string ins_type and converts it into int
   return int(binary_string, 2)
 
-#---------------------------------------------------------------
+def sign_extend(value, bits):
+    if (value & (1 << (bits - 1))) != 0:
+        value = value - (1 << bits)
+    return value
 
+#---------------------------------------------------------------
+PC = 0
 line = "00000000010110011000100110010011" 
 opcode = line[25:]
 print(opcode)
@@ -119,25 +124,29 @@ if(ins_type=="R"):
         elif(func7 == "0100000"):  #Subtract operation
             RegAddress[rd] = RegAddress[rs1] - RegAddress[rs2]   
     
-    elif(func3 == "001"): #error
-        RegAddress[rd] = int(RegAddress[rs1]*2**(UbinToInt(decimalToUBinary(RegAddress[rs2])[27:])))  #sll operation clearing required
+    elif(func7 == "0000000" and func3 == "001"): #sll
+        RegAddress[rd] = int(RegAddress[rs1]*2**(UbinToInt(decimalToUBinary(RegAddress[rs2])[27:]))) 
         
-    elif(func3 == "010"):     #slt operation
+    elif(func7 == "0000000" and func3 == "101"): #srl
+        RegAddress[rd] = int(RegAddress[rs1]//2**(UbinToInt(decimalToUBinary(RegAddress[rs2])[27:]))) 
+
+    elif(func7 == "0000000" and func3 == "010"):     #slt operation
         if(RegAddress[rs2]>RegAddress[rs1]):
             RegAddress[rd] = 1
-    # elif(func3 == "011"):  #sltu operation
-        #somebody try if possible, i will try do later (。_。)
+
+    elif(func7 == "0000000" and func3 == "011"):  #sltu operation
+        if (RegAddress[rs2]<RegAddress[rs1]):
+            RegAddress[rd]=1
+        else:
+            RegAddress[rd]=0
 
     elif(func3 == "100"):   #XOR
         RegAddress[rd] = (RegAddress[rs1]^RegAddress[rs2])
 
-    elif(func3 == "101"):   #SRL  error
-        RegAddress[rd] = int(RegAddress[rs1]/2**(UbinToInt(decimalToUBinary(RegAddress[rs2])[27:])))
-
-    elif(fun3 == "110"):   #OR
+    elif(func3 == "110"):   #OR
         RegAddress[rd] = RegAddress[rs1] | RegAddress[rs2]
     
-    elif(fun3 == "111"):   #AND
+    elif(func3 == "111"):   #AND
         RegAddress[rd] = RegAddress[rs1] & RegAddress[rs2]
 
     print(RegAddress[rd]) #testing
@@ -148,18 +157,20 @@ if(ins_type == "I"):
     rs1 = line[12:17]
     imm1 = line[0:12]
     
-    if(func3 == "010"): #lw
-        print("this is lw and i dont know")
+    if opcode == "0000011" and func3 == "010": #lw
+        address = RegAddress[rs1] + UbinToInt(imm1)
+        RegAddress[rd] = DataMemory.get(hex(address),0) #loading from memory
 
-    elif(func3 == "000"): #adii
+    elif opcode == "0010011" and func3 == "000": #adii
         RegAddress[rd] = RegAddress[rs1] + UbinToInt(imm1)
     
-    elif(fun3 == ""): #sltiu
+    elif opcode == "0010011" and func3 == "011": #sltiu
         if(RegAddress[rs1] < UbinToInt(imm1)):
             RegAddress[rd] = 1
     
     elif(opcode == "1100111"): # This is jalr (´。＿。｀)
-        print("It does something idk")
+        new_pc = (RegAddress[rs1]+UbinToInt(imm1)) & -2   #to set LSB to 0
+        RegAddress[rd]=RegAddress["00001"]+4
 
 if(ins_type == "S"):
     imm_s1 = line[20:25]
@@ -167,10 +178,42 @@ if(ins_type == "S"):
     rs1 = line[12:17]
     rs2 = line[7:12]
     imm_s2 = line[:7]
-    print("Figure out the memory stuff please")
+    if opcode == "0100011" and func3 == "010":  #sw
+        imm = sign_extend((imm_s1+imm_s2),12)
+        address = RegAddress[rs1] + imm
+        RegAddress[rd] = DataMemory.get(hex(address),0)
 
 if(ins_type == "B"):
-    print("will add some stuff tomorrow & need to figure out the PC part")
+    imm_s1 = line[20:25]  #to be fixed
+    rs2 = line[15:20]     
+    rs1 = line[7:12]      
+    func3 = line[12:15]   
+    imm_s2 = line[8:12]   
+    opcode = line[0:7] 
+    if opcode == "1100011":
+        if func3 == "000": #beq
+            if sign_extend(RegAddress[rs1]) == sign_extend(RegAddress[rs2]):
+                PC = PC + sign_extend(imm[12:1]+ "0",13)
+        
+        if func3 == "001": #bne
+            if sign_extend(RegAddress[rs1]) != sign_extend(RegAddress[rs2]):
+                PC = PC + sign_extend(imm[12:1]+ "0",13)
+        
+        if func3 == "101": #bge
+            if sign_extend(RegAddress[rs1]) >= sign_extend(RegAddress[rs2]):
+                PC = PC + sign_extend(imm[12:1]+ "0",13)
+        
+        if func3 == "100": #blt
+            if sign_extend(RegAddress[rs1]) < sign_extend(RegAddress[rs2]):
+                PC = PC + sign_extend(imm[12:1]+ "10",13)
+
+        if func3 == "110": #bltu
+            if RegAddress[rs1] < RegAddress[rs2]:
+                PC = PC + sign_extend(imm[12:1]+ "0",13)
+
+        if func3 == "111": #bgeu
+            if RegAddress[rs1] >= RegAddress[rs2]:
+                PC = PC + sign_extend(imm[12:1]+ "0",13)
 
 if(ins_type == "U"):
     rd = line[20:25]
