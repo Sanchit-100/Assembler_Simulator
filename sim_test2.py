@@ -96,30 +96,36 @@ def binary_2complement(binary_str):
 
     else:
         return int(binary_str, 2)
+
+def bin_2Complement(num):
+    # Convert the number to binary and keep the last 32 bits
+    binary = '0b'+format(num & 0xFFFFFFFF, '032b')
 #---------------------------------------------------------------
-# list1 = ["00000000000000000000010000110011",
-# "11111111100100000000010010010011",
-# "00000000000000010000010000110111",
-# "00000000100101000010000000100011",
-# "00000000000101001000010010010011",
-# "00000000010001000000010000010011",
-# "00000000100101000010000000100011",
-# "00000000000000010000010000010111",
-# "00000000000101001000010010010011",
-# "00000000100101000010000000100011",
-# "00000000010001000000010000010011",
-# "00000000000101001000010010010011",
-# "00000000100101000010000000100011",
-# "00000000000000000000000001100011"]
+list1 = ["00000000000000000000010000110011",
+"11111111100100000000010010010011",
+"00000000000000010000010000110111",
+"00000000100101000010000000100011",
+"00000000000101001000010010010011",
+"00000000010001000000010000010011",
+"00000000100101000010000000100011",
+"00000000000000010000010000010111",
+"00000000000101001000010010010011",
+"00000000100101000010000000100011",
+"00000000010001000000010000010011",
+"00000000000101001000010010010011",
+"00000000100101000010000000100011",
+"00000000000000000000000001100011"]
 
 # list1 = ["00000000100101000010000000100011","00000000000000000000000001100011"]
-f=open("input.txt","r")
-list1=f.readlines()
-f.close()
-g=open("output.txt","w")
-pc = 0
-temp1 = len(list1)-1
-# for i in range(length(list1)):
+
+# f=open("input.txt","r")
+# list1=f.readlines()
+# f.close()
+# g=open("output.txt","w")
+# pc = 0
+# temp1 = len(list1)-1
+
+
 while(pc<temp1*4):
     line = list1[int(pc/4)]  # accessing the line
     if line=="00000000000000000000000001100011":  #Virtual Halt
@@ -127,10 +133,8 @@ while(pc<temp1*4):
 
 # line = "00000000010110011000100110010011"
     
-    print(pc)
 
     opcode = line[25:]
-    print(opcode)
     ins_type = ""
     if(opcode=="0110011"):
         ins_type = "R"
@@ -156,7 +160,7 @@ while(pc<temp1*4):
 
         if(func3 == "000"):
             if(func7 == "0000000"):    #ADD operation
-                RegAddress[rd] = RegAddress[rs1] + RegAddress[rs2]
+                RegAddress[rd] = (RegAddress[rs1] + RegAddress[rs2])
                 pc = pc + 4
 
             elif(func7 == "0100000"):  #Subtract operation
@@ -285,11 +289,13 @@ while(pc<temp1*4):
             pc = temporary-1
     
 
-    # for i in range(32):
-        # print(bin(RegAddress[decimalToUBinary(i)[27:]]))
-
+    print(bin_2Complement(pc), end = " ")
     for i in range(32):
-        g.write(bin(RegAddress[decimalToUBinary(i)[27:]]))  
-        g.write("\n")   
+        print(bin_2Complement(RegAddress[decimalToUBinary(i)[27:]]), end = " ")
+    print("\n")
 
-    g.close()
+    # for i in range(32):
+    #     g.write(bin(RegAddress[decimalToUBinary(i)[27:]]))  
+    #     g.write("\n")   
+
+    # g.close()
