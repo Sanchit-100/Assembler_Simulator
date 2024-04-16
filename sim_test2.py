@@ -4,38 +4,37 @@ import sys
 # sys.path.append('.')
 RegAddress = {
   "00000":0,   #x0   zero
-  "00001":0,   #x1   Return Address
-  "00010":256,   #x2   Stack Pointer =  ( 256  )
-  "00011":0,   #x3   Global Pointer
-  "00100":0,   #x4   Thread Pointer
-  "00101":0,   #x5   Temporary/alternate link register
-  "00110":0,   #x6   Temporaries
-  "00111":0,   #x7   Temporaries
-  "01000":0,   #x8   Saved register/frame pointer
-  "01000":0,   #x8   Saved Register
-  "01001":0,   #x9   Saved Register
-  "01010":0,   #x10  Function arguments/ return values
-  "01011":0,   #x11  Function arguments/ return values
-  "01100":0,   #x12  Function arguments
-  "01101":0,   #x13  Function arguments
-  "01110":0,   #x14  Function arguments
-  "01111":0,   #x15  Function arguments
-  "10000":0,   #x16  Function arguments
-  "10001":0,   #x17  Function arguments
-  "10010":0,   #x18
-  "10011":0,   #x19
-  "10100":0,   #x20
-  "10101":0,   #x21
-  "10110":0,   #x22
-  "10111":0,   #x23
-  "11000":0,   #x24
-  "11001":0,   #x25
-  "11010":0,   #x26
-  "11011":0,   #x28
-  "11100":0,   #x29
-  "11101":0,   #x30
-  "11110":0,   #x31
-  "11111":0    #x32
+  "00001":0,   #x1   ra   Return Address
+  "00010":256, #x2   sp   Stack Pointer =  ( 256  )
+  "00011":0,   #x3   gp   Global Pointer
+  "00100":0,   #x4   tp   Thread Pointer
+  "00101":0,   #x5   t0   Temporary/alternate link register
+  "00110":0,   #x6   t1   Temporaries
+  "00111":0,   #x7   t2   Temporaries
+  "01000":0,   #x8   s0   Saved register/frame pointer
+  "01001":0,   #x8   s1   Saved Register
+  "01010":0,   #x9   a0   Saved Register
+  "01011":0,   #x10  a1   Function arguments/ return values
+  "01100":0,   #x11  a2   Function arguments/ return values
+  "01101":0,   #x12  a3   Function arguments
+  "01110":0,   #x13  a4   Function arguments
+  "01111":0,   #x14  a5   Function arguments
+  "10000":0,   #x15  a6   Function arguments
+  "10001":0,   #x16  a7   Function arguments
+  "10010":0,   #x18  s2   
+  "10011":0,   #x19  s3
+  "10100":0,   #x20  s4
+  "10101":0,   #x21  s5
+  "10110":0,   #x22  s6
+  "10111":0,   #x23  s7
+  "11000":0,   #x24  s8
+  "11001":0,   #x25  s9
+  "11010":0,   #x26  s10
+  "11011":0,   #x28  s11
+  "11100":0,   #x29  t3
+  "11101":0,   #x30  t4
+  "11110":0,   #x31  t5
+  "11111":0    #x32  t6
 }
 
 DataMemory = {
