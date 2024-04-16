@@ -228,7 +228,7 @@ while(pc<temp1*4):
         rs2 = line[7:12]
         imm_s2 = line[:7]
         imm_s = imm_s2 + imm_s1
-        DataMemory[RegAddress[rs1] + binary_2complement(imm_s)]
+        DataMemory[RegAddress[rs1] + binary_2complement(imm_s)] = RegAddress[rs2]
         pc = pc + 4
 
     if(ins_type == "B"):
