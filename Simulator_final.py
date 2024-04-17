@@ -39,37 +39,37 @@ RegAddress = {
 
 DataMemory = {
     0x001_0000 : 0,
-    0x001_0001 : 0,
-    0x001_0002 : 0,
-    0x001_0003 : 0,
     0x001_0004 : 0,
-    0x001_0005 : 0,
-    0x001_0006 : 0,
-    0x001_0007 : 0,
     0x001_0008 : 0,
-    0x001_0009 : 0,
-    0x001_000A : 0,
-    0x001_000B : 0,
-    0x001_000C : 0,
-    0x001_000D : 0,
-    0x001_000E : 0,
-    0x001_000F : 0,
+    0x001_000c : 0,
     0x001_0010 : 0,
-    0x001_0011 : 0,
-    0x001_0012 : 0,
-    0x001_0013 : 0,
     0x001_0014 : 0,
-    0x001_0015 : 0,
-    0x001_0016 : 0,
-    0x001_0017 : 0,
     0x001_0018 : 0,
-    0x001_0019 : 0,
-    0x001_001A : 0,
-    0x001_001B : 0,
-    0x001_001C : 0,
-    0x001_001D : 0,
-    0x001_001E : 0,
-    0x001_001F : 0,
+    0x001_001c : 0,
+    0x001_0020 : 0,
+    0x001_0024 : 0,
+    0x001_0028 : 0,
+    0x001_002c : 0,
+    0x001_0030 : 0,
+    0x001_0034 : 0,
+    0x001_0038 : 0,
+    0x001_003c : 0,
+    0x001_0040 : 0,
+    0x001_0044 : 0,
+    0x001_0048 : 0,
+    0x001_004c : 0,
+    0x001_0050 : 0,
+    0x001_0054 : 0,
+    0x001_0058 : 0,
+    0x001_005c : 0,
+    0x001_0060 : 0,
+    0x001_0064 : 0,
+    0x001_0068 : 0,
+    0x001_006c : 0,
+    0x001_0070 : 0,
+    0x001_0074 : 0,
+    0x001_0078 : 0,
+    0x001_007c : 0,
 }
 
 # --------------------------------------------------------------
@@ -82,6 +82,14 @@ def decimalToUBinary(num):      #takes a integer and converts it to a unsigned b
     else:
         binary_string = format(num, '032b')
 
+def sign_extend(binary_str, bits):
+    if len(binary_str) >= bits:
+        return binary_str
+    else:
+        sign = binary_str[0]
+        while len(binary_str) < bits:
+            binary_str = sign + binary_str
+        return binary_str
 
 
 def UbinToInt(binary_string):   #takes a unsigned binary number of string ins_type and converts it into int
@@ -101,52 +109,59 @@ def bin_2Complement(num):
     binary = '0b'+format(num & 0xFFFFFFFF, '032b')
     return binary
 
+def write_binary_to_file(text, filename):
+    
+    with open(filename, 'a') as file:
+        # Write the binary data to the file
+        file.write(text)
+    
+    file.close
+
 def print_data_memory(data_memory):
 
     for address, value in data_memory.items():
-        print(f"{address:#010x}:{value:#034b}")
+        s=f"{address:#010x}:{value:#034b}"
+        # print(s)
+        write_binary_to_file(s,sys.argv[2])
+        write_binary_to_file('\n',sys.argv[2])
 
-def sign_extend(binary_str, bits):
-    if len(binary_str) >= bits:
-        return binary_str
-    else:
-        sign = binary_str[0]
-        while len(binary_str) < bits:
-            binary_str = sign + binary_str
-        return binary_str
+with open(sys.argv[1], 'r') as file:
+    # Write the binary data to the file
+    list1 = file.read().splitlines()
+    file.close()
 
 #---------------------------------------------------------------
-list1 = ["00000000000000000000010010110011",
-"00000000000000000000100100110011",
-"00000000000100000000010010010011",
-"00000001000000000000100100010011",
-"00000001001001001001010010110011",
-"00000000101100000000101010010011",
-"00000001010101001010000000100011",
-"00000000000001001010100100000011",
-"00000000010001001000010010010011",
-"00000000000100000000100110010011",
-"00000001001110010111100100110011",
-"00000001001000000000100001100011",
-"00000000001100000000101000010011",
-"00000001010001001010000000100011",
-"00000000000000000000000001100011",
-"00000000001000000000101000010011",
-"00000001010001001010000000100011",
-"00000000000000000000000001100011"]
+# list1 = ["00000000000000000000010010110011",
+# "00000000000000000000100100110011",
+# "00000000000100000000010010010011",
+# "00000001000000000000100100010011",
+# "00000001001001001001010010110011",
+# "00000000101100000000101010010011",
+# "00000001010101001010000000100011",
+# "00000000000001001010100100000011",
+# "00000000010001001000010010010011",
+# "00000000000100000000100110010011",
+# "00000001001110010111100100110011",
+# "00000001001000000000100001100011",
+# "00000000001100000000101000010011",
+# "00000001010001001010000000100011",
+# "00000000000000000000000001100011",
+# "00000000001000000000101000010011",
+# "00000001010001001010000000100011",
+# "00000000000000000000000001100011"]
 
 # list1 = ["00000000100101000010000000100011","00000000000000000000000001100011"]
 
 # f=open("input.txt","r")
 # list1=f.readlines()
 # f.close()
-# g=open("output.txt","w")
+# g=open(sys.argv[2],"w")
 
 pc = 0
 temp1 = len(list1)-1
 
 
-while(pc<temp1*4):
+while(pc<=temp1*4):
     line = list1[int(pc/4)]  # accessing the line
 
 
@@ -232,7 +247,7 @@ while(pc<temp1*4):
             pc = pc + 4
 
         elif(func3 == "000"): #adii
-            RegAddress[rd] = RegAddress[rs1] + UbinToInt(sign_extend(imm1, 32))
+            RegAddress[rd] = RegAddress[rs1] + UbinToInt(sign_extend(imm1,32))
             pc = pc + 4
     
         elif(func3 == ""): #sltiu
@@ -285,13 +300,13 @@ while(pc<temp1*4):
                 pc = pc + 4 
 
         if(func3 == "110"):  #Bltu
-            if(UbinToInt(sign_extend(decimalToUBinary(RegAddress[rs1]), 32)) < UbinToInt(sign_extend(decimalToUBinary(RegAddress[rs2]), 32))):
+            if(decimalToUBinary(UbinToInt(RegAddress[rs1])) < decimalToUBinary(UbinToInt(RegAddress[rs2]))):
                 pc = pc + binary_2complement(imm_b)
             else:
                 pc = pc + 4
 
         if(func3 == "111"):  #Bgeu
-            if(UbinToInt(sign_extend(decimalToUBinary(RegAddress[rs1]), 32)) < UbinToInt(sign_extend(decimalToUBinary(RegAddress[rs2]), 32))):
+            if(decimalToUBinary(UbinToInt(RegAddress[rs1])) >= decimalToUBinary(UbinToInt(RegAddress[rs2]))):
                 pc = pc + binary_2complement(imm_b)  
             else:
                 pc = pc + 4
@@ -320,10 +335,18 @@ while(pc<temp1*4):
             pc = temporary-1
     
 
-    print(bin_2Complement(pc), end = " ")
+    # print(bin_2Complement(pc), end = " ")
+    write_binary_to_file(bin_2Complement(pc),sys.argv[2])
+    write_binary_to_file(" ",sys.argv[2])
+    
     for i in range(32):
-        print(bin_2Complement(RegAddress[decimalToUBinary(i)[27:]]), end = " ")
-    print("\n")
+        text=bin_2Complement(RegAddress[decimalToUBinary(i)[27:]])
+        write_binary_to_file(text,sys.argv[2])
+        write_binary_to_file(" ",sys.argv[2])
+        # print(text, end = " ")
+        
+    # print("\n")
+    write_binary_to_file('\n',sys.argv[2])
 
     if line=="00000000000000000000000001100011":  #Virtual Halt
         break
