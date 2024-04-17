@@ -133,8 +133,7 @@ temp1 = len(list1)-1
 
 while(pc<temp1*4):
     line = list1[int(pc/4)]  # accessing the line
-    if line=="00000000000000000000000001100011":  #Virtual Halt
-        break
+
 
 # line = "00000000010110011000100110010011"
     
@@ -310,6 +309,10 @@ while(pc<temp1*4):
     for i in range(32):
         print(bin_2Complement(RegAddress[decimalToUBinary(i)[27:]]), end = " ")
     print("\n")
+
+    if line=="00000000000000000000000001100011":  #Virtual Halt
+        break
+    
     # for i in range(32):
     #     g.write(bin(RegAddress[decimalToUBinary(i)[27:]]))  
     #     g.write("\n")   
