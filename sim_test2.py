@@ -224,9 +224,9 @@ while(pc<temp1*4):
                 RegAddress[rd] = 1
                 pc = pc + 4
     
-        elif(opcode == "1100111"): # This is jalr - kala jadu
-            # print("It does something idk")
-            continue
+        elif(opcode == "1100111"): #jalr 
+            RegAddress[rd] = pc + 4
+            pc = RegAddress[rs1] + bin_2Complement(imm1)
 
     if(ins_type == "S"):
         imm_s1 = line[20:25]
@@ -283,7 +283,7 @@ while(pc<temp1*4):
 
     if(ins_type == "J"):
         rd = line[20:25]
-        imm_j = a[0] + a[12:20] + a[11]+ a[1:11]+ "0"
+        imm_j = line[0] + line[12:20] + line[11]+ line[1:11]+ "0"
         RegAddress[rd] = pc + 4
         temporary = pc + binary_2complement(imm_j)
         if(temporary%2==0):
