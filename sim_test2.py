@@ -99,6 +99,7 @@ def binary_2complement(binary_str):
 def bin_2Complement(num):
     # Convert the number to binary and keep the last 32 bits
     binary = '0b'+format(num & 0xFFFFFFFF, '032b')
+    return binary
 #---------------------------------------------------------------
 list1 = ["00000000000000000000010010110011",
 "00000000000000000000100100110011",
@@ -309,7 +310,6 @@ while(pc<temp1*4):
     for i in range(32):
         print(bin_2Complement(RegAddress[decimalToUBinary(i)[27:]]), end = " ")
     print("\n")
-
     # for i in range(32):
     #     g.write(bin(RegAddress[decimalToUBinary(i)[27:]]))  
     #     g.write("\n")   
