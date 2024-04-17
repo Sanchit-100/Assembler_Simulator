@@ -100,6 +100,12 @@ def bin_2Complement(num):
     # Convert the number to binary and keep the last 32 bits
     binary = '0b'+format(num & 0xFFFFFFFF, '032b')
     return binary
+
+def print_data_memory(data_memory):
+
+    for address, value in data_memory.items():
+        print(f"{address:#010x}:{value:#034b}")
+
 #---------------------------------------------------------------
 list1 = ["00000000000000000000010010110011",
 "00000000000000000000100100110011",
@@ -312,7 +318,8 @@ while(pc<temp1*4):
 
     if line=="00000000000000000000000001100011":  #Virtual Halt
         break
-    
+
+print_data_memory(DataMemory)
     # for i in range(32):
     #     g.write(bin(RegAddress[decimalToUBinary(i)[27:]]))  
     #     g.write("\n")   
