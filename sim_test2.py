@@ -100,19 +100,23 @@ def bin_2Complement(num):
     # Convert the number to binary and keep the last 32 bits
     binary = '0b'+format(num & 0xFFFFFFFF, '032b')
 #---------------------------------------------------------------
-list1 = ["00000000000000000000010000110011",
-"11111111100100000000010010010011",
-"00000000000000010000010000110111",
-"00000000100101000010000000100011",
-"00000000000101001000010010010011",
-"00000000010001000000010000010011",
-"00000000100101000010000000100011",
-"00000000000000010000010000010111",
-"00000000000101001000010010010011",
-"00000000100101000010000000100011",
-"00000000010001000000010000010011",
-"00000000000101001000010010010011",
-"00000000100101000010000000100011",
+list1 = ["00000000000000000000010010110011",
+"00000000000000000000100100110011",
+"00000000000100000000010010010011",
+"00000001000000000000100100010011",
+"00000001001001001001010010110011",
+"00000000101100000000101010010011",
+"00000001010101001010000000100011",
+"00000000000001001010100100000011",
+"00000000010001001000010010010011",
+"00000000000100000000100110010011",
+"00000001001110010111100100110011",
+"00000001001000000000100001100011",
+"00000000001100000000101000010011",
+"00000001010001001010000000100011",
+"00000000000000000000000001100011",
+"00000000001000000000101000010011",
+"00000001010001001010000000100011",
 "00000000000000000000000001100011"]
 
 # list1 = ["00000000100101000010000000100011","00000000000000000000000001100011"]
@@ -191,11 +195,11 @@ while(pc<temp1*4):
             RegAddress[rd] = RegAddress[rs1]>>(RegAddress[rs2] & 0b11111)
             pc = pc + 4
 
-        elif(fun3 == "110"):   #OR
+        elif(func3 == "110"):   #OR
             RegAddress[rd] = RegAddress[rs1] | RegAddress[rs2]
             pc = pc + 4
     
-        elif(fun3 == "111"):   #AND
+        elif(func3 == "111"):   #AND
             RegAddress[rd] = RegAddress[rs1] & RegAddress[rs2]
             pc = pc + 4
 
@@ -215,7 +219,7 @@ while(pc<temp1*4):
             RegAddress[rd] = RegAddress[rs1] + UbinToInt(imm1)
             pc = pc + 4
     
-        elif(fun3 == ""): #sltiu
+        elif(func3 == ""): #sltiu
             if(RegAddress[rs1] < UbinToInt(imm1)):
                 RegAddress[rd] = 1
                 pc = pc + 4
@@ -235,32 +239,32 @@ while(pc<temp1*4):
         pc = pc + 4
 
     if(ins_type == "B"):
-        imm_b = a[0] + a[24] + a[1:7] + a[20:24]+'0'
-        func3 = a[17:20]
-        rs1 = a[12:17]
-        rs2 = a[7:12]
+        imm_b = line[0] + line[24] + line[1:7] + line[20:24]+'0'
+        func3 = line[17:20]
+        rs1 = line[12:17]
+        rs2 = line[7:12]
 
         if(func3 == "000"): #Beq
             if(RegAddress[rs1] == RegAddress[rs2]):    
                 pc = pc + binary_2complement(imm_b)
         
-        if(fun3 == "001"):  #Bne
+        if(func3 == "001"):  #Bne
             if(RegAddress[rs1] != RegAddressp[rs2]):
                 pc = pc + binary_2complement(imm_b)
 
-        if(fun3 == "100"):  #Blt
+        if(func3 == "100"):  #Blt
             if(RegAddress[rs1] < RegAddressp[rs2]):
                 pc = pc + binary_2complement(imm_b)
 
-        if(fun3 == "101"):  #Bge
+        if(func3 == "101"):  #Bge
             if(RegAddress[rs1] >= RegAddressp[rs2]):
                 pc = pc + binary_2complement(imm_b)
 
-        if(fun3 == "110"):  #Bltu
+        if(func3 == "110"):  #Bltu
             if(decimalToUBinary(UbinToInt(RegAddress[rs1])) < decimalToUBinary(UbinToInt(RegAddressp[rs2]))):
                 pc = pc + binary_2complement(imm_b)
 
-        if(fun3 == "111"):  #Bgeu
+        if(func3 == "111"):  #Bgeu
             if(decimalToUBinary(UbinToInt(RegAddress[rs1])) >= decimalToUBinary(UbinToInt(RegAddressp[rs2]))):
                 pc = pc + binary_2complement(imm_b)  
 
