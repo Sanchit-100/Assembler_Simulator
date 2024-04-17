@@ -125,8 +125,9 @@ list1 = ["00000000000000000000010010110011",
 # list1=f.readlines()
 # f.close()
 # g=open("output.txt","w")
-# pc = 0
-# temp1 = len(list1)-1
+
+pc = 0
+temp1 = len(list1)-1
 
 
 while(pc<temp1*4):
