@@ -247,26 +247,38 @@ while(pc<temp1*4):
         if(func3 == "000"): #Beq
             if(RegAddress[rs1] == RegAddress[rs2]):    
                 pc = pc + binary_2complement(imm_b)
+            else:
+                pc = pc + 4
         
         if(func3 == "001"):  #Bne
             if(RegAddress[rs1] != RegAddressp[rs2]):
                 pc = pc + binary_2complement(imm_b)
+            else:
+                pc = pc + 4
 
         if(func3 == "100"):  #Blt
             if(RegAddress[rs1] < RegAddressp[rs2]):
                 pc = pc + binary_2complement(imm_b)
+            else:
+                pc = pc + 4
 
         if(func3 == "101"):  #Bge
             if(RegAddress[rs1] >= RegAddressp[rs2]):
                 pc = pc + binary_2complement(imm_b)
+            else:
+                pc = pc + 4 
 
         if(func3 == "110"):  #Bltu
             if(decimalToUBinary(UbinToInt(RegAddress[rs1])) < decimalToUBinary(UbinToInt(RegAddressp[rs2]))):
                 pc = pc + binary_2complement(imm_b)
+            else:
+                pc = pc + 4
 
         if(func3 == "111"):  #Bgeu
             if(decimalToUBinary(UbinToInt(RegAddress[rs1])) >= decimalToUBinary(UbinToInt(RegAddressp[rs2]))):
                 pc = pc + binary_2complement(imm_b)  
+            else:
+                pc = pc + 4
 
     
     if(ins_type == "U"):
