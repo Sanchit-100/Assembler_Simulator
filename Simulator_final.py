@@ -300,13 +300,13 @@ while(pc<=temp1*4):
                 pc = pc + 4 
 
         if(func3 == "110"):  #Bltu
-            if(decimalToUBinary(UbinToInt(RegAddress[rs1])) < decimalToUBinary(UbinToInt(RegAddress[rs2]))):
+            if(UbinToInt(sign_extend(decimalToUBinary(RegAddress[rs1]), 32)) < UbinToInt(sign_extend(decimalToUBinary(RegAddress[rs2]), 32))):
                 pc = pc + binary_2complement(imm_b)
             else:
                 pc = pc + 4
 
         if(func3 == "111"):  #Bgeu
-            if(decimalToUBinary(UbinToInt(RegAddress[rs1])) >= decimalToUBinary(UbinToInt(RegAddress[rs2]))):
+            if(UbinToInt(sign_extend(decimalToUBinary(RegAddress[rs1]), 32)) < UbinToInt(sign_extend(decimalToUBinary(RegAddress[rs2]), 32))):
                 pc = pc + binary_2complement(imm_b)  
             else:
                 pc = pc + 4
