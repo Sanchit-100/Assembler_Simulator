@@ -77,8 +77,16 @@ operations = {
    "auipc":["0010111","U"],
    
    # J type instructions
-   "jal":["1101111","J"]
-   
+   "jal":["1101111","J"],
+
+    # Bonus type I instruction
+   "halt":["0000000","H"],
+   # Bonus type II instruction
+   "rst":["0000001","RS"],
+   # Bonus Type III instruction
+   "mul":["0000010","M"],
+   # Bonus type IV instruction
+   "rvrs":["0000011","RV"]
 
 }
 
@@ -352,6 +360,23 @@ for line in code:
             temp_imm = str(decimal_to_binary(label_value,21))
             final_imm= temp_imm[0] + temp_imm[10:20] + temp_imm[9] + temp_imm[1:9]
             s = final_imm + RegAddress[rd] + operations[value[0]][0]
+
+        elif(operations[value[0]][1] == "H"):
+            s = "0000000000000000000000000" + operations[value[0]][0]
+
+        elif(operations[value[0]][1] == "RS"):
+            s = "0000000000000000000000000" + operations[value[0]][0]
+        
+        elif(operations[value[0]][1] == "M"):
+            rd = value[1]
+            rs1 = value[2]
+            rs2 = value[3]
+            s = "0000000" + RegAddress[rs2] + RegAddress[rs1] + "000" + RegAddress[rd] + operations[value[0]][0]
+        
+        elif(operations[value[0]][1] == "RV"):
+            rd = value[1]
+            rs = value[2]
+            s = "0000000" + "00000" + RegAddress[rs] + "000" + RegAddress[rd] + operations[value[0]][0]
     
     
         print(s)
