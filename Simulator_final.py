@@ -81,6 +81,22 @@ def decimalToUBinary(num):      #takes a integer and converts it to a unsigned b
         return binary_string
     else:
         binary_string = format(num, '032b')
+        
+def custom_bin_convert(num):      
+    if(num>=0):
+        binary_string = format(num, '032b')
+    else:
+        binary_string = format(2**32 + num, '032b')
+    return binary_string
+
+# ************************************************
+# Function for two's compement conversion to integer
+def bin_to_int(bin_str):
+    if bin_str[0] == '1':
+        return -1 * (int(''.join('1' if x == '0' else '0' for x in bin_str), 2) + 1)
+    else:
+        return int(bin_str, 2)
+# *************************************************
 
 def sign_extend(binary_str, bits):
     if len(binary_str) >= bits:
@@ -95,14 +111,14 @@ def sign_extend(binary_str, bits):
 def UbinToInt(binary_string):   #takes a unsigned binary number of string ins_type and converts it into int
   return int(binary_string, 2)
 
-def binary_2complement(binary_str):
-    if binary_str[0] == "1":
-        inverted_bits = "".join("1" if bit == "0" else "0" for bit in binary_str)
-        twos_complement = int(inverted_bits, 2) + 1
-        return -twos_complement
+# def bin_to_int(binary_str):
+#     if binary_str[0] == "1":
+#         inverted_bits = "".join("1" if bit == "0" else "0" for bit in binary_str)
+#         twos_complement = int(inverted_bits, 2) + 1
+#         return twos_complement*(-1)
 
-    else:
-        return int(binary_str, 2)
+#     else:
+#         return int(binary_str, 2)
 
 def bin_2Complement(num):
     # Convert the number to binary and keep the last 32 bits
@@ -120,7 +136,7 @@ def write_binary_to_file(text, filename):
 def print_data_memory(data_memory):
 
     for address, value in data_memory.items():
-        s=f"{address:#010x}:{value:#034b}"
+        s=f"{address:#010x}:{bin_2Complement(value)}"
         # print(s)
         write_binary_to_file(s,sys.argv[2])
         write_binary_to_file('\n',sys.argv[2])
@@ -163,11 +179,7 @@ temp1 = len(list1)-1
 
 while(pc<=temp1*4):
     line = list1[int(pc/4)]  # accessing the line
-
-
-# line = "00000000010110011000100110010011"
     
-
     opcode = line[25:]
     ins_type = ""
     if(opcode=="0110011"):
@@ -208,13 +220,20 @@ while(pc<=temp1*4):
         
         elif(func3 == "010"):     #slt operation
             if(RegAddress[rs2]>RegAddress[rs1]):
+                # print(RegAddress[rs2])
+                # print(RegAddress[rs1])
                 RegAddress[rd] = 1
-                pc = pc + 4
+            
+            pc = pc + 4
+            pc=pc & ~1 
+                
 
         elif(func3 == "011"):  #sltu operation  
             if(UbinToInt(decimalToUBinary(RegAddress[rs2])) > UbinToInt(decimalToUBinary(RegAddress[rs1]))):
                 RegAddress[rd] = 1
-                pc = pc + 4
+                
+            pc = pc + 4
+            pc=pc & ~1
                            
 
         elif(func3 == "100"):   #XOR
@@ -243,21 +262,28 @@ while(pc<=temp1*4):
         imm1 = line[0:12]
     
         if(func3 == "010"): #lw
-            RegAddress[rd] = DataMemory[RegAddress[rs1] + binary_2complement(imm1)]
+            RegAddress[rd] = DataMemory[RegAddress[rs1] + bin_to_int(imm1)]
             pc = pc + 4
 
         elif(func3 == "000"): #adii
-            RegAddress[rd] = RegAddress[rs1] + UbinToInt(sign_extend(imm1,32))
+            RegAddress[rd] = RegAddress[rs1] + bin_to_int(imm1)
             pc = pc + 4
+            pc = pc & ~1
+            # print(RegAddress[rd])
+            
     
-        elif(func3 == ""): #sltiu
+        elif(func3 == "011"): #sltiu
             if(RegAddress[rs1] < UbinToInt(imm1)):
                 RegAddress[rd] = 1
-                pc = pc + 4
+            
+            pc = pc + 4
     
-        elif(opcode == "1100111"): #jalr 
+        if(opcode == "1100111"): #jalr 
             RegAddress[rd] = pc + 4
-            pc = RegAddress[rs1] + bin_2Complement(imm1)
+            pc = RegAddress[rs1] + UbinToInt(imm1)
+            # print("hello")
+            pc = pc & ~1
+            # print(pc)
 
     if(ins_type == "S"):
         imm_s1 = line[20:25]
@@ -266,7 +292,7 @@ while(pc<=temp1*4):
         rs2 = line[7:12]
         imm_s2 = line[:7]
         imm_s = imm_s2 + imm_s1
-        DataMemory[RegAddress[rs1] + binary_2complement(imm_s)] = RegAddress[rs2]
+        DataMemory[RegAddress[rs1] + bin_to_int(imm_s)] = RegAddress[rs2]
         pc = pc + 4
 
     if(ins_type == "B"):
@@ -277,37 +303,37 @@ while(pc<=temp1*4):
 
         if(func3 == "000"): #Beq
             if(RegAddress[rs1] == RegAddress[rs2]):    
-                pc = pc + binary_2complement(imm_b)
+                pc = pc + bin_to_int(imm_b)
             else:
                 pc = pc + 4
         
         if(func3 == "001"):  #Bne
             if(RegAddress[rs1] != RegAddress[rs2]):
-                pc = pc + binary_2complement(imm_b)
+                pc = pc + bin_to_int(imm_b)
             else:
                 pc = pc + 4
 
         if(func3 == "100"):  #Blt
             if(RegAddress[rs1] < RegAddress[rs2]):
-                pc = pc + binary_2complement(imm_b)
+                pc = pc + bin_to_int(imm_b)
             else:
                 pc = pc + 4
 
         if(func3 == "101"):  #Bge
             if(RegAddress[rs1] >= RegAddress[rs2]):
-                pc = pc + binary_2complement(imm_b)
+                pc = pc + bin_to_int(imm_b)
             else:
                 pc = pc + 4 
 
         if(func3 == "110"):  #Bltu
-            if(UbinToInt(sign_extend(decimalToUBinary(RegAddress[rs1]), 32)) < UbinToInt(sign_extend(decimalToUBinary(RegAddress[rs2]), 32))):
-                pc = pc + binary_2complement(imm_b)
+            if(decimalToUBinary(UbinToInt(RegAddress[rs1])) < decimalToUBinary(UbinToInt(RegAddress[rs2]))):
+                pc = pc + bin_to_int(imm_b)
             else:
                 pc = pc + 4
 
         if(func3 == "111"):  #Bgeu
-            if(UbinToInt(sign_extend(decimalToUBinary(RegAddress[rs1]), 32)) < UbinToInt(sign_extend(decimalToUBinary(RegAddress[rs2]), 32))):
-                pc = pc + binary_2complement(imm_b)  
+            if(decimalToUBinary(UbinToInt(RegAddress[rs1])) >= decimalToUBinary(UbinToInt(RegAddress[rs2]))):
+                pc = pc + bin_to_int(imm_b)  
             else:
                 pc = pc + 4
 
@@ -317,25 +343,27 @@ while(pc<=temp1*4):
         imm_u = line[:20]
 
         if(opcode == "0110111"):  #lui
-            RegAddress[rd] = binary_2complement(imm_u + "000000000000")
+            RegAddress[rd] = bin_to_int(imm_u + "000000000000")
             pc = pc + 4
 
         if(opcode == "0010111"):  #auipc
-            RegAddress[rd] = pc + binary_2complement(imm_u + "000000000000")
+            RegAddress[rd] = pc + bin_to_int(imm_u + "000000000000")
             pc = pc + 4
 
     if(ins_type == "J"):
         rd = line[20:25]
         imm_j = line[0] + line[12:20] + line[11]+ line[1:11]+ "0"
         RegAddress[rd] = pc + 4
-        temporary = pc + binary_2complement(imm_j)
-        if(temporary%2==0):
-            pc = temporary
-        else:
-            pc = temporary-1
+        pc = pc + UbinToInt(imm_j)
+        pc = pc & ~1
     
+    # 00000001100000000000000011101111
 
     # print(bin_2Complement(pc), end = " ")
+    RegAddress["00000"]=0
+    RegAddress["00011"]=0
+    RegAddress["00100"]=0
+    
     write_binary_to_file(bin_2Complement(pc),sys.argv[2])
     write_binary_to_file(" ",sys.argv[2])
     
@@ -348,6 +376,7 @@ while(pc<=temp1*4):
     # print("\n")
     write_binary_to_file('\n',sys.argv[2])
 
+    RegAddress["00000"]=0
     if line=="00000000000000000000000001100011":  #Virtual Halt
         break
 
