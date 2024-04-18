@@ -194,7 +194,15 @@ while(pc<=temp1*4):
         ins_type = "U"
     elif(opcode == "1101111"):
         ins_type = "J"
-
+    elif(opcode == "0000010"):
+        ins_type = "M"
+    elif(opcode == "0000011"):
+        ins_type = "RV"
+    elif(opcode == "0000000"):
+        ins_type = "H"
+    elif(opcode == "0000001"):
+        ins_type = "RS"
+        
     if(ins_type=="R"):
         func3 = line[17:20]
         func7 = line[:7]
@@ -356,6 +364,32 @@ while(pc<=temp1*4):
         RegAddress[rd] = pc + 4
         pc = pc + UbinToInt(imm_j)
         pc = pc & ~1
+        
+    if(ins_type == "RV"):
+        rs1  = line[12:17]
+        rd = line[20:25]
+        binary_rs1 = custom_bin_convert(RegAddress[rs1])
+        reverese_rs1 = binary_rs1[len(binary_rs1)-1:1:-1]
+        RegAddress[rd] = bin_to_int(reverese_rs1)
+        pc = pc + 4
+        
+    if(ins_type == "M"):
+        rs2 = line[7:12]
+        rs1 = line[12:17]
+        rd = line[20:25]
+        RegAddress[rd]=RegAddress[rs1]*RegAddress[rs2]
+        pc = pc + 4
+        
+    if(ins_type == "H"):
+        pc=-1
+        
+    if(ins_type == "RS"):
+        for i in RegAddress.keys():
+            if(i=="00010"):
+                RegAddress[i]=256
+            else:
+                RegAddress[i]=0
+        pc = pc + 4
     
     # 00000001100000000000000011101111
 
