@@ -106,15 +106,6 @@ def print_data_memory(data_memory):
     for address, value in data_memory.items():
         print(f"{address:#010x}:{value:#034b}")
 
-def sign_extend(binary_str, bits):
-    if len(binary_str) >= bits:
-        return binary_str
-    else:
-        sign = binary_str[0]
-        while len(binary_str) < bits:
-            binary_str = sign + binary_str
-        return binary_str
-
 #---------------------------------------------------------------
 list1 = ["00000000000000000000010010110011",
 "00000000000000000000100100110011",
@@ -232,7 +223,7 @@ while(pc<temp1*4):
             pc = pc + 4
 
         elif(func3 == "000"): #adii
-            RegAddress[rd] = RegAddress[rs1] + UbinToInt(sign_extend(imm1, 32))
+            RegAddress[rd] = RegAddress[rs1] + UbinToInt(imm1)
             pc = pc + 4
     
         elif(func3 == ""): #sltiu
@@ -285,13 +276,13 @@ while(pc<temp1*4):
                 pc = pc + 4 
 
         if(func3 == "110"):  #Bltu
-            if(UbinToInt(sign_extend(decimalToUBinary(RegAddress[rs1]), 32)) < UbinToInt(sign_extend(decimalToUBinary(RegAddress[rs2]), 32))):
+            if(decimalToUBinary(UbinToInt(RegAddress[rs1])) < decimalToUBinary(UbinToInt(RegAddressp[rs2]))):
                 pc = pc + binary_2complement(imm_b)
             else:
                 pc = pc + 4
 
         if(func3 == "111"):  #Bgeu
-            if(UbinToInt(sign_extend(decimalToUBinary(RegAddress[rs1]), 32)) < UbinToInt(sign_extend(decimalToUBinary(RegAddress[rs2]), 32))):
+            if(decimalToUBinary(UbinToInt(RegAddress[rs1])) >= decimalToUBinary(UbinToInt(RegAddressp[rs2]))):
                 pc = pc + binary_2complement(imm_b)  
             else:
                 pc = pc + 4
